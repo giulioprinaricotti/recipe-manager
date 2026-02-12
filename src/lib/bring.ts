@@ -1,9 +1,33 @@
+const BRING_DEEPLINK_API = "https://api.getbring.com/rest/bringrecipes/deeplink";
+
 interface BringIngredient {
   name: string;
   quantity?: string | null;
   unit?: string | null;
 }
 
+/**
+ * Generate a Bring! deeplink URL from the original recipe source URL.
+ * Bring will crawl the page for schema.org/Recipe JSON-LD markup.
+ */
+export function getBringDeeplink(
+  sourceUrl: string,
+  servings?: number | null
+): string {
+  const params = new URLSearchParams({
+    url: sourceUrl,
+    source: "web",
+    ...(servings && {
+      baseQuantity: String(servings),
+      requestedQuantity: String(servings),
+    }),
+  });
+  return `${BRING_DEEPLINK_API}?${params.toString()}`;
+}
+
+/**
+ * Format ingredients as plain text for clipboard fallback.
+ */
 export function formatIngredientsForBring(
   ingredients: BringIngredient[]
 ): string {
@@ -15,13 +39,15 @@ export function formatIngredientsForBring(
     .join("\n");
 }
 
+/**
+ * Generate ShareData for Web Share API fallback (no sourceUrl).
+ */
 export function generateShareData(
   recipeTitle: string,
   ingredients: BringIngredient[]
 ): ShareData {
-  const text = formatIngredientsForBring(ingredients);
   return {
     title: `Shopping list for ${recipeTitle}`,
-    text,
+    text: formatIngredientsForBring(ingredients),
   };
 }

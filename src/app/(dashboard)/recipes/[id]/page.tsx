@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { Button } from "@/components/ui/button";
 import { ShareTooBringButton } from "./share-to-bring-button";
 
 export default async function RecipePage({
@@ -43,6 +42,8 @@ export default async function RecipePage({
           <ShareTooBringButton
             recipeTitle={recipe.title}
             ingredients={recipe.ingredients}
+            sourceUrl={recipe.sourceUrl}
+            servings={recipe.servings}
           />
         )}
       </div>
