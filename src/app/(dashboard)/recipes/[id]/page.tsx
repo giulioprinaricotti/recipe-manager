@@ -40,9 +40,9 @@ export default async function RecipePage({
         <h1 className="text-3xl font-semibold">{recipe.title}</h1>
         {recipe.ingredients.length > 0 && (
           <ShareTooBringButton
+            recipeId={recipe.id}
             recipeTitle={recipe.title}
             ingredients={recipe.ingredients}
-            sourceUrl={recipe.sourceUrl}
             servings={recipe.servings}
           />
         )}

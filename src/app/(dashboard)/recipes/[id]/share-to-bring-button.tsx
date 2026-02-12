@@ -10,25 +10,23 @@ interface Ingredient {
 }
 
 export function ShareTooBringButton({
+  recipeId,
   recipeTitle,
   ingredients,
-  sourceUrl,
   servings,
 }: {
+  recipeId: string;
   recipeTitle: string;
   ingredients: Ingredient[];
-  sourceUrl: string | null;
   servings: number | null;
 }) {
   async function handleShare() {
-    if (sourceUrl) {
-      // Use the official Bring deeplink API — Bring crawls the source URL
-      // for schema.org/Recipe JSON-LD markup
-      window.open(getBringDeeplink(sourceUrl, servings), "_blank");
-      return;
-    }
+    // Use our schema.json endpoint so Bring gets exact stored quantities
+    const schemaUrl = `${window.location.origin}/api/recipes/${recipeId}/schema.json`;
+    window.open(getBringDeeplink(schemaUrl, servings), "_blank");
+  }
 
-    // Fallback: no source URL, share ingredients as plain text
+  async function handleFallback() {
     const shareData = generateShareData(recipeTitle, ingredients);
     if (navigator.canShare?.(shareData)) {
       await navigator.share(shareData);
@@ -39,8 +37,13 @@ export function ShareTooBringButton({
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={handleShare}>
-      Add to Bring
-    </Button>
+    <div className="flex gap-2">
+      <Button variant="outline" size="sm" onClick={handleShare}>
+        Add to Bring
+      </Button>
+      <Button variant="ghost" size="sm" onClick={handleFallback}>
+        Copy list
+      </Button>
+    </div>
   );
 }
