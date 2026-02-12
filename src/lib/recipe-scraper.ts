@@ -25,7 +25,10 @@ export async function scrapeRecipe(
   url: string
 ): Promise<ScrapedRecipe | null> {
   const response = await fetch(url, {
-    headers: { "User-Agent": "RecipeManager/1.0" },
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    },
   });
 
   if (!response.ok) {
@@ -60,7 +63,9 @@ function findRecipe(data: unknown): Record<string, unknown> | null {
 
   const obj = data as Record<string, unknown>;
 
-  if (obj["@type"] === "Recipe") return obj;
+  const type = obj["@type"];
+  if (type === "Recipe") return obj;
+  if (Array.isArray(type) && type.includes("Recipe")) return obj;
 
   if (Array.isArray(data)) {
     for (const item of data) {
