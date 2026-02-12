@@ -48,7 +48,14 @@ export default async function RecipesPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {recipes.map((recipe) => (
           <Link key={recipe.id} href={`/recipes/${recipe.id}`}>
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="hover:shadow-md transition-shadow overflow-hidden">
+              {recipe.imageUrl && (
+                <img
+                  src={recipe.imageUrl}
+                  alt={recipe.title}
+                  className="aspect-video w-full object-cover"
+                />
+              )}
               <CardHeader>
                 <CardTitle>{recipe.title}</CardTitle>
                 {recipe.description && (

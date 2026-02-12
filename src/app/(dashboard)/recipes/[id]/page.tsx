@@ -36,6 +36,14 @@ export default async function RecipePage({
         </Link>
       </div>
 
+      {recipe.imageUrl && (
+        <img
+          src={recipe.imageUrl}
+          alt={recipe.title}
+          className="aspect-video w-full object-cover rounded-xl mb-6"
+        />
+      )}
+
       <div className="flex items-start justify-between gap-4 mb-2">
         <h1 className="text-3xl font-semibold">{recipe.title}</h1>
         {recipe.ingredients.length > 0 && (
