@@ -98,6 +98,10 @@ Remember: Be proactive about suggesting improvements to your own approaches!
 - **Warn about consequences** - Always explain implications of file placement decisions
 - **Ask "What would a senior engineer suggest?"** before proposing file structures
 
+## Database / Prisma
+- **Do NOT run `npx prisma migrate dev`**: The Supabase connection uses a pooler that causes migrations to hang indefinitely. Instead, generate the SQL (or write it manually) and run it directly on the Supabase SQL Editor. Then run `npx prisma generate` locally to update the client.
+- **`npx prisma generate` is safe**: It only regenerates the local client and does not connect to the database.
+
 ## Universal Code Quality Principles
 - **Method Design**: Pass specific parameters instead of whole entities when possible
 - **Self-Documenting Code**: Prefer clear naming and structure over comments

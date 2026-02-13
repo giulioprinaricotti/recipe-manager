@@ -3,6 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ShareTooBringButton } from "./share-to-bring-button";
+import { RecipeTagEditor } from "./recipe-tag-editor";
 
 export default async function RecipePage({
   params,
@@ -75,6 +76,10 @@ export default async function RecipePage({
             Source ↗
           </a>
         )}
+      </div>
+
+      <div className="mb-6">
+        <RecipeTagEditor recipeId={recipe.id} initialTags={recipe.tags} />
       </div>
 
       {recipe.ingredients.length > 0 && (
