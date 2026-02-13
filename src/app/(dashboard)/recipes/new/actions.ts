@@ -2,6 +2,7 @@
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { parseIngredient } from "@/lib/ingredient-parser";
 import { scrapeRecipe, type ScrapedRecipe } from "@/lib/recipe-scraper";
 
 export async function scrapeRecipeAction(
@@ -38,10 +39,10 @@ export async function saveScrapedRecipe(
       prepTime: recipe.prepTime,
       cookTime: recipe.cookTime,
       ingredients: {
-        create: recipe.ingredients.map((name, i) => ({
-          name,
-          order: i,
-        })),
+        create: recipe.ingredients.map((raw, i) => {
+          const { name, quantity, unit } = parseIngredient(raw);
+          return { name, quantity, unit, order: i };
+        }),
       },
       instructions: {
         create: recipe.instructions.map((description, i) => ({
