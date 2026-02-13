@@ -8,7 +8,7 @@ interface BringIngredient {
 
 /**
  * Generate a Bring! deeplink URL.
- * Pass a .json schema URL for exact quantities, or a web page URL for HTML scraping.
+ * Bring will crawl the URL for schema.org/Recipe JSON-LD markup.
  */
 export function getBringDeeplink(
   recipeUrl: string,

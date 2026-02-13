@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { getBringDeeplink, generateShareData } from "@/lib/bring";
 import { Button } from "@/components/ui/button";
 
@@ -21,12 +20,10 @@ export function ShareTooBringButton({
   ingredients: Ingredient[];
   servings: number | null;
 }) {
-  const [bringUrl, setBringUrl] = useState("");
-
-  useEffect(() => {
-    const schemaUrl = `${window.location.origin}/api/recipes/${recipeId}/schema.json`;
-    setBringUrl(getBringDeeplink(schemaUrl, servings));
-  }, [recipeId, servings]);
+  function handleBringClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    const schemaUrl = `${window.location.origin}/api/recipes/${recipeId}/schema`;
+    e.currentTarget.href = getBringDeeplink(schemaUrl, servings);
+  }
 
   async function handleFallback() {
     const shareData = generateShareData(recipeTitle, ingredients);
@@ -41,7 +38,7 @@ export function ShareTooBringButton({
   return (
     <div className="flex gap-2">
       <Button variant="outline" size="sm" asChild>
-        <a href={bringUrl}>Add to Bring</a>
+        <a href="#" onClick={handleBringClick}>Add to Bring</a>
       </Button>
       <Button variant="ghost" size="sm" onClick={handleFallback}>
         Copy list

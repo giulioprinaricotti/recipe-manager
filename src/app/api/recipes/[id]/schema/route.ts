@@ -20,14 +20,14 @@ export async function GET(
   }
 
   const jsonLd = {
-    "@context": "http://schema.org",
+    "@context": "https://schema.org",
     "@type": "Recipe",
     name: recipe.title,
-    description: recipe.description ?? undefined,
-    image: recipe.imageUrl ?? undefined,
-    recipeYield: recipe.servings ? String(recipe.servings) : undefined,
-    prepTime: recipe.prepTime ? `PT${recipe.prepTime}M` : undefined,
-    cookTime: recipe.cookTime ? `PT${recipe.cookTime}M` : undefined,
+    ...(recipe.description && { description: recipe.description }),
+    ...(recipe.imageUrl && { image: recipe.imageUrl }),
+    ...(recipe.servings && { recipeYield: String(recipe.servings) }),
+    ...(recipe.prepTime && { prepTime: `PT${recipe.prepTime}M` }),
+    ...(recipe.cookTime && { cookTime: `PT${recipe.cookTime}M` }),
     recipeIngredient: recipe.ingredients.map((ing) =>
       [ing.quantity, ing.unit, ing.name].filter(Boolean).join(" ")
     ),
@@ -37,7 +37,17 @@ export async function GET(
     })),
   };
 
-  return NextResponse.json(jsonLd, {
-    headers: { "Content-Type": "application/ld+json" },
+  const html = `<!DOCTYPE html>
+<html>
+<head>
+<script type="application/ld+json">
+${JSON.stringify(jsonLd)}
+</script>
+</head>
+<body></body>
+</html>`;
+
+  return new NextResponse(html, {
+    headers: { "Content-Type": "text/html; charset=utf-8" },
   });
 }
