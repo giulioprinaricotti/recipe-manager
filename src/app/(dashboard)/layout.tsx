@@ -28,6 +28,12 @@ export default async function DashboardLayout({
             >
               My Recipes
             </Link>
+            <Link
+              href="/meal-plans"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Meal Plans
+            </Link>
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm text-muted-foreground">
