@@ -1,16 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { scrapeRecipeAction } from "./actions";
+import { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { scrapeRecipeAction, saveEditedRecipe } from "./actions";
 import type { ScrapedRecipe } from "@/lib/recipe-scraper";
 import { parseIngredient } from "@/lib/ingredient-parser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { EditRecipeForm } from "./edit-recipe-form";
-import type { EditableIngredient, EditableInstruction } from "./types";
+import type {
+  EditableIngredient,
+  EditableInstruction,
+  RecipeContentData,
+} from "./types";
 
 export default function NewRecipePage() {
+  const router = useRouter();
   const [url, setUrl] = useState("");
   const [scraping, setScraping] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +34,8 @@ export default function NewRecipePage() {
   const [editInstructions, setEditInstructions] = useState<
     EditableInstruction[] | null
   >(null);
+
+  const savedIdRef = useRef<string | null>(null);
 
   async function handleScrape(e: React.FormEvent) {
     e.preventDefault();
@@ -59,6 +74,29 @@ export default function NewRecipePage() {
     }
   }
 
+  async function handleSave(
+    data: RecipeContentData
+  ): Promise<{ error: string } | void> {
+    if (!recipe) return { error: "No recipe data" };
+
+    const result = await saveEditedRecipe({
+      title: recipe.title,
+      description: recipe.description,
+      sourceUrl: recipe.sourceUrl,
+      imageUrl: recipe.imageUrl,
+      servings: recipe.servings,
+      prepTime: recipe.prepTime,
+      cookTime: recipe.cookTime,
+      ...data,
+    });
+
+    if ("error" in result) {
+      return { error: result.error };
+    }
+
+    savedIdRef.current = result.id;
+  }
+
   return (
     <div className="max-w-2xl mx-auto">
       <h1 className="text-2xl font-semibold mb-6">Add Recipe from URL</h1>
@@ -87,11 +125,29 @@ export default function NewRecipePage() {
       )}
 
       {recipe && editIngredients && editInstructions && (
-        <EditRecipeForm
-          recipe={recipe}
-          initialIngredients={editIngredients}
-          initialInstructions={editInstructions}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle>{recipe.title}</CardTitle>
+            {recipe.description && (
+              <CardDescription className="line-clamp-3">
+                {recipe.description}
+              </CardDescription>
+            )}
+            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pt-1">
+              {recipe.servings && <span>Serves {recipe.servings}</span>}
+              {recipe.prepTime && <span>Prep {recipe.prepTime} min</span>}
+              {recipe.cookTime && <span>Cook {recipe.cookTime} min</span>}
+            </div>
+          </CardHeader>
+          <CardContent>
+            <EditRecipeForm
+              initialIngredients={editIngredients}
+              initialInstructions={editInstructions}
+              onSave={handleSave}
+              onSuccess={() => router.push(`/recipes/${savedIdRef.current}`)}
+            />
+          </CardContent>
+        </Card>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ShareTooBringButton } from "./share-to-bring-button";
 import { RecipeTagEditor } from "./recipe-tag-editor";
+import { RecipeEditor } from "./recipe-editor";
 
 export default async function RecipePage({
   params,
@@ -82,39 +83,11 @@ export default async function RecipePage({
         <RecipeTagEditor recipeId={recipe.id} initialTags={recipe.tags} />
       </div>
 
-      {recipe.ingredients.length > 0 && (
-        <section className="mb-8">
-          <h2 className="text-xl font-semibold mb-3">Ingredients</h2>
-          <ul className="space-y-1">
-            {recipe.ingredients.map((ing) => (
-              <li key={ing.id} className="flex gap-2 text-sm">
-                {(ing.quantity || ing.unit) && (
-                  <span className="text-muted-foreground w-20 shrink-0">
-                    {[ing.quantity, ing.unit].filter(Boolean).join(" ")}
-                  </span>
-                )}
-                <span>{ing.name}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {recipe.instructions.length > 0 && (
-        <section>
-          <h2 className="text-xl font-semibold mb-3">Instructions</h2>
-          <ol className="space-y-4">
-            {recipe.instructions.map((step) => (
-              <li key={step.id} className="flex gap-4 text-sm">
-                <span className="text-muted-foreground font-medium w-6 shrink-0 pt-0.5">
-                  {step.stepNumber}.
-                </span>
-                <span className="leading-relaxed">{step.description}</span>
-              </li>
-            ))}
-          </ol>
-        </section>
-      )}
+      <RecipeEditor
+        recipeId={recipe.id}
+        ingredients={recipe.ingredients}
+        instructions={recipe.instructions}
+      />
     </div>
   );
 }
