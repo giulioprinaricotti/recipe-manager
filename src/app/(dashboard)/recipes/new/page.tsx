@@ -1,33 +1,34 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { scrapeRecipeAction, saveScrapedRecipe } from "./actions";
+import { scrapeRecipeAction } from "./actions";
 import type { ScrapedRecipe } from "@/lib/recipe-scraper";
+import { parseIngredient } from "@/lib/ingredient-parser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { EditRecipeForm } from "./edit-recipe-form";
+import type { EditableIngredient, EditableInstruction } from "./types";
 
 export default function NewRecipePage() {
-  const router = useRouter();
   const [url, setUrl] = useState("");
   const [scraping, setScraping] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recipe, setRecipe] = useState<ScrapedRecipe | null>(null);
+  const [editIngredients, setEditIngredients] = useState<
+    EditableIngredient[] | null
+  >(null);
+  const [editInstructions, setEditInstructions] = useState<
+    EditableInstruction[] | null
+  >(null);
 
   async function handleScrape(e: React.FormEvent) {
     e.preventDefault();
     setScraping(true);
     setError(null);
     setRecipe(null);
+    setEditIngredients(null);
+    setEditInstructions(null);
 
     const result = await scrapeRecipeAction(url);
 
@@ -36,23 +37,25 @@ export default function NewRecipePage() {
     if ("error" in result) {
       setError(result.error);
     } else {
-      setRecipe(result.data);
-    }
-  }
-
-  async function handleSave() {
-    if (!recipe) return;
-    setSaving(true);
-    setError(null);
-
-    const result = await saveScrapedRecipe(recipe);
-
-    setSaving(false);
-
-    if ("error" in result) {
-      setError(result.error);
-    } else {
-      router.push(`/recipes/${result.id}`);
+      const data = result.data;
+      setRecipe(data);
+      setEditIngredients(
+        data.ingredients.map((raw) => {
+          const { name, quantity, unit } = parseIngredient(raw);
+          return {
+            key: crypto.randomUUID(),
+            name,
+            quantity: quantity ?? "",
+            unit: unit ?? "",
+          };
+        })
+      );
+      setEditInstructions(
+        data.instructions.map((desc) => ({
+          key: crypto.randomUUID(),
+          description: desc,
+        }))
+      );
     }
   }
 
@@ -83,52 +86,12 @@ export default function NewRecipePage() {
         <p className="text-sm text-destructive mb-4">{error}</p>
       )}
 
-      {recipe && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{recipe.title}</CardTitle>
-            {recipe.description && (
-              <CardDescription className="line-clamp-3">
-                {recipe.description}
-              </CardDescription>
-            )}
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-              {recipe.servings && <span>Serves {recipe.servings}</span>}
-              {recipe.prepTime && <span>Prep {recipe.prepTime} min</span>}
-              {recipe.cookTime && <span>Cook {recipe.cookTime} min</span>}
-            </div>
-
-            {recipe.ingredients.length > 0 && (
-              <div>
-                <p className="text-sm font-medium mb-1">
-                  {recipe.ingredients.length} ingredients
-                </p>
-                <ul className="text-sm text-muted-foreground space-y-0.5 list-disc list-inside">
-                  {recipe.ingredients.slice(0, 5).map((ing, i) => (
-                    <li key={i} className="truncate">{ing}</li>
-                  ))}
-                  {recipe.ingredients.length > 5 && (
-                    <li className="list-none text-xs">
-                      +{recipe.ingredients.length - 5} more
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-
-            {recipe.instructions.length > 0 && (
-              <p className="text-sm text-muted-foreground">
-                {recipe.instructions.length} steps
-              </p>
-            )}
-
-            <Button onClick={handleSave} disabled={saving} className="w-full">
-              {saving ? "Saving..." : "Save Recipe"}
-            </Button>
-          </CardContent>
-        </Card>
+      {recipe && editIngredients && editInstructions && (
+        <EditRecipeForm
+          recipe={recipe}
+          initialIngredients={editIngredients}
+          initialInstructions={editInstructions}
+        />
       )}
     </div>
   );
