@@ -116,7 +116,7 @@ export function RecipeEditor({
                 <span className="text-muted-foreground font-medium w-6 shrink-0 pt-0.5">
                   {step.stepNumber}.
                 </span>
-                <span className="leading-relaxed">{step.description}</span>
+                <span className="leading-relaxed" dangerouslySetInnerHTML={{ __html: step.description }} />
               </li>
             ))}
           </ol>
