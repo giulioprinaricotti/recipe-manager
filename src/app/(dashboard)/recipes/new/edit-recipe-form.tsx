@@ -92,6 +92,13 @@ export function EditRecipeForm({
     setInstructions((prev) => prev.filter((step) => step.key !== key));
   }
 
+  function addInstruction() {
+    setInstructions((prev) => [
+      ...prev,
+      { key: crypto.randomUUID(), description: "" },
+    ]);
+  }
+
   async function handleSave() {
     setSaving(true);
     setError(null);
@@ -251,6 +258,16 @@ export function EditRecipeForm({
               </Button>
             </div>
           ))}
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={addInstruction}
+          >
+            <Plus className="h-4 w-4 mr-1" />
+            Add Step
+          </Button>
         </div>
       </section>
 

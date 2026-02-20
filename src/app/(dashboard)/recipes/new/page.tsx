@@ -16,14 +16,20 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { EditRecipeForm } from "./edit-recipe-form";
+import { ManualRecipeForm } from "./manual-recipe-form";
 import type {
   EditableIngredient,
   EditableInstruction,
   RecipeContentData,
 } from "./types";
 
+type Mode = "url" | "manual";
+
 export default function NewRecipePage() {
   const router = useRouter();
+  const [mode, setMode] = useState<Mode>("url");
+
+  // URL-scrape state
   const [url, setUrl] = useState("");
   const [scraping, setScraping] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,56 +105,77 @@ export default function NewRecipePage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">Add Recipe from URL</h1>
+      <h1 className="text-2xl font-semibold mb-6">Add Recipe</h1>
 
-      <form onSubmit={handleScrape} className="flex gap-2 mb-8">
-        <div className="flex-1">
-          <Label htmlFor="url" className="sr-only">
-            Recipe URL
-          </Label>
-          <Input
-            id="url"
-            type="url"
-            placeholder="https://www.example.com/recipe/..."
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            required
-          />
-        </div>
-        <Button type="submit" disabled={scraping}>
-          {scraping ? "Scraping..." : "Scrape"}
+      <div className="flex gap-2 mb-8">
+        <Button
+          variant={mode === "url" ? "default" : "outline"}
+          onClick={() => setMode("url")}
+        >
+          From URL
         </Button>
-      </form>
+        <Button
+          variant={mode === "manual" ? "default" : "outline"}
+          onClick={() => setMode("manual")}
+        >
+          From Scratch
+        </Button>
+      </div>
 
-      {error && (
-        <p className="text-sm text-destructive mb-4">{error}</p>
-      )}
-
-      {recipe && editIngredients && editInstructions && (
-        <Card>
-          <CardHeader>
-            <CardTitle>{recipe.title}</CardTitle>
-            {recipe.description && (
-              <CardDescription className="line-clamp-3">
-                {recipe.description}
-              </CardDescription>
-            )}
-            <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pt-1">
-              {recipe.servings && <span>Serves {recipe.servings}</span>}
-              {recipe.prepTime && <span>Prep {recipe.prepTime} min</span>}
-              {recipe.cookTime && <span>Cook {recipe.cookTime} min</span>}
+      {mode === "url" && (
+        <>
+          <form onSubmit={handleScrape} className="flex gap-2 mb-8">
+            <div className="flex-1">
+              <Label htmlFor="url" className="sr-only">
+                Recipe URL
+              </Label>
+              <Input
+                id="url"
+                type="url"
+                placeholder="https://www.example.com/recipe/..."
+                value={url}
+                onChange={(e) => setUrl(e.target.value)}
+                required
+              />
             </div>
-          </CardHeader>
-          <CardContent>
-            <EditRecipeForm
-              initialIngredients={editIngredients}
-              initialInstructions={editInstructions}
-              onSave={handleSave}
-              onSuccess={() => router.push(`/recipes/${savedIdRef.current}`)}
-            />
-          </CardContent>
-        </Card>
+            <Button type="submit" disabled={scraping}>
+              {scraping ? "Scraping..." : "Scrape"}
+            </Button>
+          </form>
+
+          {error && (
+            <p className="text-sm text-destructive mb-4">{error}</p>
+          )}
+
+          {recipe && editIngredients && editInstructions && (
+            <Card>
+              <CardHeader>
+                <CardTitle>{recipe.title}</CardTitle>
+                {recipe.description && (
+                  <CardDescription className="line-clamp-3">
+                    {recipe.description}
+                  </CardDescription>
+                )}
+                <div className="flex flex-wrap gap-4 text-sm text-muted-foreground pt-1">
+                  {recipe.servings && <span>Serves {recipe.servings}</span>}
+                  {recipe.prepTime && <span>Prep {recipe.prepTime} min</span>}
+                  {recipe.cookTime && <span>Cook {recipe.cookTime} min</span>}
+                </div>
+              </CardHeader>
+              <CardContent>
+                <EditRecipeForm
+                  initialIngredients={editIngredients}
+                  initialInstructions={editInstructions}
+                  onSave={handleSave}
+                  onSuccess={() => router.push(`/recipes/${savedIdRef.current}`)}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </>
       )}
+
+      {mode === "manual" && <ManualRecipeForm />}
     </div>
   );
 }

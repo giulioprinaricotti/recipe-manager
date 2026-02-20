@@ -24,7 +24,7 @@ export interface RecipeContentData {
 export interface EditedRecipePayload {
   title: string;
   description?: string;
-  sourceUrl: string;
+  sourceUrl?: string;
   imageUrl?: string;
   servings?: number;
   prepTime?: number;
