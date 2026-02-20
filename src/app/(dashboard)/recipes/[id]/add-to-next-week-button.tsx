@@ -2,29 +2,33 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { getWeekStart, toWeekId } from "@/lib/weeks";
 import { addRecipeToMealPlan } from "@/app/(dashboard)/meal-plans/[weekId]/actions";
 
-export function AddToNextWeekButton({ recipeId }: { recipeId: string }) {
-  const [state, setState] = useState<"idle" | "loading" | "added">("idle");
+export function AddToNextWeekButton({
+  recipeId,
+  nextWeekId,
+  alreadyPlanned,
+}: {
+  recipeId: string;
+  nextWeekId: string;
+  alreadyPlanned: boolean;
+}) {
+  const [state, setState] = useState<"idle" | "loading" | "added">(
+    alreadyPlanned ? "added" : "idle"
+  );
 
   async function handleClick() {
     setState("loading");
-    const now = new Date();
-    const currentWeek = getWeekStart(now);
-    const nextWeek = new Date(currentWeek);
-    nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
-    const weekId = toWeekId(nextWeek);
+    await addRecipeToMealPlan(nextWeekId, recipeId);
+    setState("added");
+  }
 
-    const result = await addRecipeToMealPlan(weekId, recipeId);
-
-    if ("error" in result) {
-      setState("added"); // already added — show same "added" state
-    } else {
-      setState("added");
-    }
-
-    setTimeout(() => setState("idle"), 2000);
+  if (state === "added") {
+    return (
+      <span className="text-sm text-muted-foreground py-1">
+        Planned next week
+      </span>
+    );
   }
 
   return (
@@ -32,13 +36,9 @@ export function AddToNextWeekButton({ recipeId }: { recipeId: string }) {
       variant="outline"
       size="sm"
       onClick={handleClick}
-      disabled={state !== "idle"}
+      disabled={state === "loading"}
     >
-      {state === "loading"
-        ? "Adding…"
-        : state === "added"
-          ? "Added!"
-          : "+ Next Week"}
+      {state === "loading" ? "Adding…" : "+ Next Week"}
     </Button>
   );
 }

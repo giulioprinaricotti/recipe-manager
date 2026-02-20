@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { getWeekStart, toWeekId } from "@/lib/weeks";
 import { ShareTooBringButton } from "./share-to-bring-button";
 import { RecipeTagEditor } from "./recipe-tag-editor";
 import { RecipeEditor } from "./recipe-editor";
@@ -24,6 +25,19 @@ export default async function RecipePage({
   });
 
   if (!recipe) notFound();
+
+  const currentWeek = getWeekStart(new Date());
+  const nextWeek = new Date(currentWeek);
+  nextWeek.setUTCDate(nextWeek.getUTCDate() + 7);
+  const nextWeekId = toWeekId(nextWeek);
+
+  const nextWeekPlan = await prisma.mealPlan.findUnique({
+    where: {
+      userId_weekStart: { userId: session!.user.id, weekStart: nextWeek },
+    },
+    select: { items: { where: { recipeId: id }, select: { id: true } } },
+  });
+  const isPlannedNextWeek = (nextWeekPlan?.items.length ?? 0) > 0;
 
   const totalTime =
     (recipe.prepTime ?? 0) + (recipe.cookTime ?? 0) || undefined;
@@ -77,7 +91,7 @@ export default async function RecipePage({
       <div className="flex items-start justify-between gap-4 mb-2">
         <h1 className="text-3xl font-semibold">{recipe.title}</h1>
         <div className="flex gap-2 shrink-0">
-          <AddToNextWeekButton recipeId={recipe.id} />
+          <AddToNextWeekButton recipeId={recipe.id} nextWeekId={nextWeekId} alreadyPlanned={isPlannedNextWeek} />
           {recipe.ingredients.length > 0 && (
             <ShareTooBringButton
               recipeId={recipe.id}
