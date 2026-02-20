@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { ShareTooBringButton } from "./share-to-bring-button";
 import { RecipeTagEditor } from "./recipe-tag-editor";
 import { RecipeEditor } from "./recipe-editor";
+import { AddToNextWeekButton } from "./add-to-next-week-button";
 
 export default async function RecipePage({
   params,
@@ -75,14 +76,17 @@ export default async function RecipePage({
 
       <div className="flex items-start justify-between gap-4 mb-2">
         <h1 className="text-3xl font-semibold">{recipe.title}</h1>
-        {recipe.ingredients.length > 0 && (
-          <ShareTooBringButton
-            recipeId={recipe.id}
-            recipeTitle={recipe.title}
-            ingredients={recipe.ingredients}
-            servings={recipe.servings}
-          />
-        )}
+        <div className="flex gap-2 shrink-0">
+          <AddToNextWeekButton recipeId={recipe.id} />
+          {recipe.ingredients.length > 0 && (
+            <ShareTooBringButton
+              recipeId={recipe.id}
+              recipeTitle={recipe.title}
+              ingredients={recipe.ingredients}
+              servings={recipe.servings}
+            />
+          )}
+        </div>
       </div>
 
       {recipe.description && (
