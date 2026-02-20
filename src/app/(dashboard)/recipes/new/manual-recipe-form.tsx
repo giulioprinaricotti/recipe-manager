@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EditRecipeForm } from "./edit-recipe-form";
+import { ImagePicker } from "./image-picker";
 import { saveEditedRecipe } from "./actions";
 import type {
   EditableIngredient,
@@ -31,6 +32,10 @@ export function ManualRecipeForm() {
   const [servings, setServings] = useState("");
   const [prepTime, setPrepTime] = useState("");
   const [cookTime, setCookTime] = useState("");
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+  const [imageAttribution, setImageAttribution] = useState<string | undefined>(
+    undefined
+  );
 
   async function handleSave(
     data: RecipeContentData
@@ -42,6 +47,8 @@ export function ManualRecipeForm() {
     const result = await saveEditedRecipe({
       title: title.trim(),
       description: description.trim() || undefined,
+      imageUrl,
+      imageAttribution,
       servings: servings ? parseInt(servings, 10) || undefined : undefined,
       prepTime: prepTime ? parseInt(prepTime, 10) || undefined : undefined,
       cookTime: cookTime ? parseInt(cookTime, 10) || undefined : undefined,
@@ -73,6 +80,18 @@ export function ManualRecipeForm() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Brief description (optional)"
+        />
+      </div>
+      <div>
+        <Label>Cover Image</Label>
+        <ImagePicker
+          value={imageUrl}
+          attribution={imageAttribution}
+          onChange={(url, attr) => {
+            setImageUrl(url);
+            setImageAttribution(attr);
+          }}
+          defaultQuery={title}
         />
       </div>
       <div className="grid grid-cols-3 gap-4">

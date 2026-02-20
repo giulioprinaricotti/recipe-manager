@@ -97,6 +97,7 @@ export async function saveEditedRecipe(
       description: recipe.description,
       sourceUrl: recipe.sourceUrl,
       imageUrl: recipe.imageUrl,
+      imageAttribution: recipe.imageAttribution,
       servings: recipe.servings,
       prepTime: recipe.prepTime,
       cookTime: recipe.cookTime,

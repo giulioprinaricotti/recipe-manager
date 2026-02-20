@@ -26,6 +26,7 @@ export interface EditedRecipePayload {
   description?: string;
   sourceUrl?: string;
   imageUrl?: string;
+  imageAttribution?: string;
   servings?: number;
   prepTime?: number;
   cookTime?: number;

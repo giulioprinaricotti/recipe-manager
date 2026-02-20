@@ -39,12 +39,39 @@ export default async function RecipePage({
       </div>
 
       {recipe.imageUrl && (
-        <img
-          src={recipe.imageUrl}
-          alt={recipe.title}
-          className="aspect-video w-full object-cover rounded-xl mb-6"
-        />
+        <div className={recipe.imageAttribution ? "mb-2" : "mb-6"}>
+          <img
+            src={recipe.imageUrl}
+            alt={recipe.title}
+            className="aspect-video w-full object-cover rounded-xl"
+          />
+        </div>
       )}
+      {recipe.imageAttribution && (() => {
+        const [name, profileUrl] = recipe.imageAttribution.split("|");
+        return (
+          <p className="text-xs text-muted-foreground mb-4">
+            Photo by{" "}
+            <a
+              href={profileUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              {name}
+            </a>{" "}
+            on{" "}
+            <a
+              href="https://unsplash.com/?utm_source=recipe_manager&utm_medium=referral"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline"
+            >
+              Unsplash
+            </a>
+          </p>
+        );
+      })()}
 
       <div className="flex items-start justify-between gap-4 mb-2">
         <h1 className="text-3xl font-semibold">{recipe.title}</h1>

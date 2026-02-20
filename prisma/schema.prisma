@@ -23,7 +23,8 @@ model Recipe {
   title       String
   description String?
   sourceUrl   String?
-  imageUrl    String?
+  imageUrl          String?
+  imageAttribution  String?
   servings    Int?
   prepTime    Int?
   cookTime    Int?
