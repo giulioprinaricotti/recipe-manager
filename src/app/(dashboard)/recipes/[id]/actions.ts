@@ -86,3 +86,69 @@ export async function updateRecipeContent(
 
   return undefined;
 }
+
+export async function updateRecipeMetadata(
+  recipeId: string,
+  data: { servings?: number; prepTime?: number; cookTime?: number }
+): Promise<{ error: string } | void> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const recipe = await prisma.recipe.findUnique({
+    where: { id: recipeId, userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!recipe) {
+    return { error: "Recipe not found" };
+  }
+
+  await prisma.recipe.update({
+    where: { id: recipeId },
+    data: {
+      servings: data.servings ?? null,
+      prepTime: data.prepTime ?? null,
+      cookTime: data.cookTime ?? null,
+    },
+  });
+
+  revalidatePath(`/recipes/${recipeId}`);
+  revalidatePath("/recipes");
+
+  return undefined;
+}
+
+export async function updateRecipeCoverImage(
+  recipeId: string,
+  imageUrl: string | undefined,
+  imageAttribution: string | undefined
+): Promise<{ error: string } | void> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const recipe = await prisma.recipe.findUnique({
+    where: { id: recipeId, userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!recipe) {
+    return { error: "Recipe not found" };
+  }
+
+  await prisma.recipe.update({
+    where: { id: recipeId },
+    data: {
+      imageUrl: imageUrl ?? null,
+      imageAttribution: imageAttribution ?? null,
+    },
+  });
+
+  revalidatePath(`/recipes/${recipeId}`);
+  revalidatePath("/recipes");
+
+  return undefined;
+}
