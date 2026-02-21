@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "preinstall": "ln -sf ~/Progetti/Other/recipe-manager/.env .env 2>/dev/null; ln -sf ~/.config/recipe-manager/.env.local .env.local 2>/dev/null; true",
     "postinstall": "prisma generate"
   },
   "dependencies": {
