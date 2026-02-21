@@ -103,7 +103,10 @@ export function EditRecipeForm({
     setSaving(true);
     setError(null);
 
-    const filteredIngredients = ingredients.filter(
+    const allIngredients = addRow.name.trim()
+      ? [...ingredients, { key: crypto.randomUUID(), ...addRow }]
+      : ingredients;
+    const filteredIngredients = allIngredients.filter(
       (ing) => ing.name.trim() !== ""
     );
     const filteredInstructions = instructions.filter(
@@ -184,7 +187,7 @@ export function EditRecipeForm({
           ))}
 
           {/* Add ingredient row */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pt-3 border-t border-dashed">
             <IngredientAutocomplete
               value={addRow.name}
               onChange={(v) => setAddRow({ ...addRow, name: v })}
@@ -219,13 +222,14 @@ export function EditRecipeForm({
             </Button>
             <Button
               type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 text-muted-foreground hover:text-foreground"
+              variant="outline"
+              size="sm"
+              className="shrink-0"
               onClick={addIngredient}
               disabled={!addRow.name.trim()}
             >
-              <Plus className="h-4 w-4" />
+              <Plus className="h-4 w-4 mr-1" />
+              Add
             </Button>
           </div>
         </div>
