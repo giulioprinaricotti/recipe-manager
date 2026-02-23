@@ -9,6 +9,7 @@ interface RecipeCoverImageProps {
   imageUrl: string | null;
   imageAttribution: string | null;
   title: string;
+  isOwn: boolean;
 }
 
 export function RecipeCoverImage({
@@ -16,6 +17,7 @@ export function RecipeCoverImage({
   imageUrl,
   imageAttribution,
   title,
+  isOwn,
 }: RecipeCoverImageProps) {
   const router = useRouter();
 
@@ -66,6 +68,8 @@ export function RecipeCoverImage({
       </>
     );
   }
+
+  if (!isOwn) return null;
 
   return (
     <div className="mb-6">

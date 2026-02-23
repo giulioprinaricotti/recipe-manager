@@ -29,12 +29,14 @@ interface RecipeEditorProps {
   recipeId: string;
   ingredients: Ingredient[];
   instructions: Instruction[];
+  isOwn: boolean;
 }
 
 export function RecipeEditor({
   recipeId,
   ingredients,
   instructions,
+  isOwn,
 }: RecipeEditorProps) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -83,14 +85,16 @@ export function RecipeEditor({
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-xl font-semibold">Ingredients</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setEditing(true)}
-            >
-              <Pencil className="h-3.5 w-3.5 mr-1.5" />
-              Edit
-            </Button>
+            {isOwn && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditing(true)}
+              >
+                <Pencil className="h-3.5 w-3.5 mr-1.5" />
+                Edit
+              </Button>
+            )}
           </div>
           <ul className="space-y-1">
             {ingredients.map((ing) => (

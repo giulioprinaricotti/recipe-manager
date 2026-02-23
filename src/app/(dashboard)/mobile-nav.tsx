@@ -41,7 +41,7 @@ export function MobileNav({ userName }: { userName: string | null | undefined })
             href="/recipes"
             className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent"
           >
-            My Recipes
+            Recipes
           </Link>
           <Link
             href="/meal-plans"

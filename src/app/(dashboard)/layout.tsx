@@ -28,7 +28,7 @@ export default async function DashboardLayout({
               href="/recipes"
               className="hidden text-sm text-muted-foreground hover:text-foreground md:inline"
             >
-              My Recipes
+              Recipes
             </Link>
             <Link
               href="/meal-plans"

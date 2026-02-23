@@ -13,6 +13,7 @@ interface RecipeMetadataEditorProps {
   prepTime: number | null;
   cookTime: number | null;
   sourceUrl: string | null;
+  isOwn: boolean;
 }
 
 export function RecipeMetadataEditor({
@@ -21,6 +22,7 @@ export function RecipeMetadataEditor({
   prepTime,
   cookTime,
   sourceUrl,
+  isOwn,
 }: RecipeMetadataEditorProps) {
   const router = useRouter();
   const [editing, setEditing] = useState(false);
@@ -129,12 +131,14 @@ export function RecipeMetadataEditor({
           Source ↗
         </a>
       )}
-      <button
-        onClick={handleEdit}
-        className="opacity-0 group-hover/meta:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-      >
-        <Pencil className="h-3.5 w-3.5" />
-      </button>
+      {isOwn && (
+        <button
+          onClick={handleEdit}
+          className="opacity-0 group-hover/meta:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
     </div>
   );
 }

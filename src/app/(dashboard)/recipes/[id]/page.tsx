@@ -19,14 +19,17 @@ export default async function RecipePage({
   const session = await auth();
 
   const recipe = await prisma.recipe.findUnique({
-    where: { id, userId: session!.user.id },
+    where: { id },
     include: {
       ingredients: { orderBy: { order: "asc" } },
       instructions: { orderBy: { stepNumber: "asc" } },
+      user: { select: { name: true, email: true } },
     },
   });
 
   if (!recipe) notFound();
+
+  const isOwn = recipe.userId === session!.user.id;
 
   const currentWeek = getWeekStart(new Date());
   const nextWeek = new Date(currentWeek);
@@ -48,7 +51,7 @@ export default async function RecipePage({
           href="/recipes"
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          ← My Recipes
+          ← Recipes
         </Link>
       </div>
 
@@ -57,10 +60,18 @@ export default async function RecipePage({
         imageUrl={recipe.imageUrl}
         imageAttribution={recipe.imageAttribution}
         title={recipe.title}
+        isOwn={isOwn}
       />
 
       <div className="flex items-start justify-between gap-4 mb-2">
-        <h1 className="text-3xl font-semibold">{recipe.title}</h1>
+        <div>
+          <h1 className="text-3xl font-semibold">{recipe.title}</h1>
+          {!isOwn && (
+            <p className="text-sm text-muted-foreground mt-1">
+              Added by {recipe.user.name || recipe.user.email}
+            </p>
+          )}
+        </div>
         <div className="flex gap-2 shrink-0">
           <AddToNextWeekButton recipeId={recipe.id} nextWeekId={nextWeekId} alreadyPlanned={isPlannedNextWeek} />
           {recipe.ingredients.length > 0 && (
@@ -84,16 +95,18 @@ export default async function RecipePage({
         prepTime={recipe.prepTime}
         cookTime={recipe.cookTime}
         sourceUrl={recipe.sourceUrl}
+        isOwn={isOwn}
       />
 
       <div className="mb-6">
-        <RecipeTagEditor recipeId={recipe.id} initialTags={recipe.tags} />
+        <RecipeTagEditor recipeId={recipe.id} initialTags={recipe.tags} isOwn={isOwn} />
       </div>
 
       <RecipeEditor
         recipeId={recipe.id}
         ingredients={recipe.ingredients}
         instructions={recipe.instructions}
+        isOwn={isOwn}
       />
     </div>
   );

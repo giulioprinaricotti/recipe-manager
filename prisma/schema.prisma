@@ -8,13 +8,14 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String      @id @default(cuid())
+  email        String      @unique
   name         String?
   passwordHash String
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime    @default(now())
   recipes      Recipe[]
   mealPlans    MealPlan[]
+  favourites   Favourite[]
 }
 
 model Recipe {
@@ -35,6 +36,7 @@ model Recipe {
   ingredients   Ingredient[]
   instructions  Instruction[]
   mealPlanItems MealPlanItem[]
+  favouritedBy  Favourite[]
 
   @@index([userId])
 }
@@ -85,4 +87,16 @@ model MealPlanItem {
 
   @@unique([mealPlanId, recipeId])
   @@index([mealPlanId])
+}
+
+model Favourite {
+  userId    String
+  recipeId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@id([userId, recipeId])
+  @@index([userId])
+  @@index([recipeId])
 }

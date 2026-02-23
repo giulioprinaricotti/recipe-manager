@@ -8,9 +8,11 @@ import { cn } from "@/lib/utils";
 export function RecipeTagEditor({
   recipeId,
   initialTags,
+  isOwn,
 }: {
   recipeId: string;
   initialTags: string[];
+  isOwn: boolean;
 }) {
   const [selected, setSelected] = useState<Set<string>>(new Set(initialTags));
   const [isPending, startTransition] = useTransition();
@@ -40,8 +42,8 @@ export function RecipeTagEditor({
           return (
             <button
               key={tag.slug}
-              onClick={() => toggle(tag.slug)}
-              disabled={isPending}
+              onClick={() => isOwn && toggle(tag.slug)}
+              disabled={isPending || !isOwn}
               className={cn(
                 "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium transition-opacity",
                 "border cursor-pointer disabled:opacity-50",
