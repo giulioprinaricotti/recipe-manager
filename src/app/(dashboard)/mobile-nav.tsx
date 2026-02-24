@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sheet";
 import { SignOutButton } from "./sign-out-button";
 
-export function MobileNav({ userName }: { userName: string | null | undefined }) {
+export function MobileNav({ userName, isAdmin }: { userName: string | null | undefined; isAdmin?: boolean }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
@@ -49,6 +49,14 @@ export function MobileNav({ userName }: { userName: string | null | undefined })
           >
             Meal Plans
           </Link>
+          {isAdmin && (
+            <Link
+              href="/invite"
+              className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent"
+            >
+              Invite
+            </Link>
+          )}
         </nav>
         <div className="flex flex-col gap-2 border-t px-4 pt-4">
           {userName && (

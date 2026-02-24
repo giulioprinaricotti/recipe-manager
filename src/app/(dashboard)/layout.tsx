@@ -20,7 +20,7 @@ export default async function DashboardLayout({
       <header className="sticky top-0 z-40 border-b bg-background">
         <nav className="container mx-auto flex h-14 items-center justify-between px-4">
           <div className="flex items-center gap-2 md:gap-6">
-            <MobileNav userName={session.user.name || session.user.email} />
+            <MobileNav userName={session.user.name || session.user.email} isAdmin={session.user.isAdmin} />
             <Link href="/recipes" className="text-lg font-semibold">
               Recipe Manager
             </Link>
@@ -36,6 +36,14 @@ export default async function DashboardLayout({
             >
               Meal Plans
             </Link>
+            {session.user.isAdmin && (
+              <Link
+                href="/invite"
+                className="hidden text-sm text-muted-foreground hover:text-foreground md:inline"
+              >
+                Invite
+              </Link>
+            )}
           </div>
           <div className="hidden items-center gap-4 md:flex">
             <span className="text-sm text-muted-foreground">
