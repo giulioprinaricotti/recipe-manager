@@ -57,6 +57,12 @@ export function MobileNav({ userName, isAdmin }: { userName: string | null | und
               Invite
             </Link>
           )}
+          <Link
+            href="/how-it-works"
+            className="rounded-md px-3 py-2 text-sm font-medium hover:bg-accent"
+          >
+            How It Works
+          </Link>
         </nav>
         <div className="flex flex-col gap-2 border-t px-4 pt-4">
           {userName && (

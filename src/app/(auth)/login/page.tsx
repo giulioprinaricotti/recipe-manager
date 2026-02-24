@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -82,6 +83,12 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
+            <Link
+              href="/how-it-works"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              How does it work?
+            </Link>
           </CardFooter>
         </form>
       </Card>

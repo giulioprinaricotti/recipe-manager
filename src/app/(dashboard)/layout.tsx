@@ -44,6 +44,12 @@ export default async function DashboardLayout({
                 Invite
               </Link>
             )}
+            <Link
+              href="/how-it-works"
+              className="hidden text-sm text-muted-foreground hover:text-foreground md:inline"
+            >
+              How It Works
+            </Link>
           </div>
           <div className="hidden items-center gap-4 md:flex">
             <span className="text-sm text-muted-foreground">
