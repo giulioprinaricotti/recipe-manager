@@ -131,7 +131,7 @@ export default function NewRecipePage() {
               </Label>
               <Input
                 id="url"
-                type="url"
+                type="text"
                 placeholder="https://www.example.com/recipe/..."
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}

@@ -10,7 +10,8 @@ export async function scrapeRecipeAction(
   url: string
 ): Promise<{ data: ScrapedRecipe } | { error: string }> {
   try {
-    const data = await scrapeRecipe(url);
+    const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    const data = await scrapeRecipe(normalizedUrl);
     if (!data) {
       return { error: "No recipe data found at this URL. The site may not use structured recipe markup." };
     }
