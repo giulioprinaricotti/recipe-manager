@@ -68,6 +68,8 @@ export async function updateRecipeContent(
           quantity: ing.quantity.trim() || null,
           unit: ing.unit.trim() || null,
           order: i,
+          optional: ing.optional,
+          alternativeGroupId: ing.alternativeGroupId,
         },
       })
     ),

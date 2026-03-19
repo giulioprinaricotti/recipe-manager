@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { formatIngredientLines } from "@/lib/ingredient-utils";
 
 export async function GET(
   _req: NextRequest,
@@ -28,9 +29,7 @@ export async function GET(
     ...(recipe.servings && { recipeYield: String(recipe.servings) }),
     ...(recipe.prepTime && { prepTime: `PT${recipe.prepTime}M` }),
     ...(recipe.cookTime && { cookTime: `PT${recipe.cookTime}M` }),
-    recipeIngredient: recipe.ingredients.map((ing) =>
-      [ing.quantity, ing.unit, ing.name].filter(Boolean).join(" ")
-    ),
+    recipeIngredient: formatIngredientLines(recipe.ingredients),
     recipeInstructions: recipe.instructions.map((step) => ({
       "@type": "HowToStep",
       text: step.description,

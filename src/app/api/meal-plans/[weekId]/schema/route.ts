@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fromWeekId, formatWeekLabel } from "@/lib/weeks";
+import { formatIngredientLines } from "@/lib/ingredient-utils";
 
 export async function GET(
   req: NextRequest,
@@ -38,9 +39,7 @@ export async function GET(
   }
 
   const allIngredients = mealPlan.items.flatMap((item) =>
-    item.recipe.ingredients.map((ing) =>
-      [ing.quantity, ing.unit, ing.name].filter(Boolean).join(" ")
-    )
+    formatIngredientLines(item.recipe.ingredients)
   );
 
   const jsonLd = {

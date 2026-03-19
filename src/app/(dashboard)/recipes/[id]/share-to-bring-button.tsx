@@ -7,6 +7,8 @@ interface Ingredient {
   name: string;
   quantity: string | null;
   unit: string | null;
+  optional: boolean;
+  alternativeGroupId: string | null;
 }
 
 export function ShareTooBringButton({

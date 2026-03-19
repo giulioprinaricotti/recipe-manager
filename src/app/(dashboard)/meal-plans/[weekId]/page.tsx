@@ -45,7 +45,7 @@ export default async function MealPlanWeekPage({
               tags: true,
               ingredients: {
                 orderBy: { order: "asc" },
-                select: { name: true, quantity: true, unit: true },
+                select: { name: true, quantity: true, unit: true, optional: true, alternativeGroupId: true },
               },
             },
           },

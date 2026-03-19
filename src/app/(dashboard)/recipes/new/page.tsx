@@ -68,6 +68,8 @@ export default function NewRecipePage() {
             name,
             quantity: quantity ?? "",
             unit: unit ?? "",
+            optional: false,
+            alternativeGroupId: null,
           };
         })
       );

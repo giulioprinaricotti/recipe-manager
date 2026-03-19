@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { X, Plus } from "lucide-react";
+import { X, Plus, GitBranch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -22,7 +22,7 @@ interface EditRecipeFormProps {
   saveLabel?: string;
 }
 
-const emptyAddRow = { name: "", quantity: "", unit: "" };
+const emptyAddRow = { name: "", quantity: "", unit: "", optional: false, alternativeGroupId: null as string | null };
 
 export function EditRecipeForm({
   initialIngredients,
@@ -63,6 +63,58 @@ export function EditRecipeForm({
         return { ...ing, quantity: "q.b.", unit: "" };
       })
     );
+  }
+
+  function toggleOptional(key: string) {
+    setIngredients((prev) =>
+      prev.map((ing) =>
+        ing.key === key ? { ...ing, optional: !ing.optional } : ing
+      )
+    );
+  }
+
+  function addAlternative(key: string) {
+    setIngredients((prev) => {
+      const idx = prev.findIndex((ing) => ing.key === key);
+      if (idx === -1) return prev;
+      const target = prev[idx];
+      const groupId = target.alternativeGroupId ?? crypto.randomUUID();
+      const updated = [...prev];
+      // Ensure the target has the group ID
+      updated[idx] = { ...target, alternativeGroupId: groupId };
+      // Insert new alternative right after
+      const newAlt: EditableIngredient = {
+        key: crypto.randomUUID(),
+        name: "",
+        quantity: "",
+        unit: "",
+        optional: target.optional,
+        alternativeGroupId: groupId,
+      };
+      updated.splice(idx + 1, 0, newAlt);
+      return updated;
+    });
+  }
+
+  function handleRemoveIngredient(key: string) {
+    setIngredients((prev) => {
+      const target = prev.find((ing) => ing.key === key);
+      const filtered = prev.filter((ing) => ing.key !== key);
+      // If removing leaves only 1 in the group, ungroup it
+      if (target?.alternativeGroupId) {
+        const remaining = filtered.filter(
+          (ing) => ing.alternativeGroupId === target.alternativeGroupId
+        );
+        if (remaining.length === 1) {
+          return filtered.map((ing) =>
+            ing.alternativeGroupId === target.alternativeGroupId
+              ? { ...ing, alternativeGroupId: null }
+              : ing
+          );
+        }
+      }
+      return filtered;
+    });
   }
 
   function addIngredient() {
@@ -118,6 +170,8 @@ export function EditRecipeForm({
         name: ing.name,
         quantity: ing.quantity,
         unit: ing.unit,
+        optional: ing.optional,
+        alternativeGroupId: ing.alternativeGroupId,
       })),
       instructions: filteredInstructions.map((step) => ({
         description: step.description,
@@ -141,50 +195,90 @@ export function EditRecipeForm({
       <section>
         <h3 className="text-sm font-medium mb-2">Ingredients</h3>
         <div className="space-y-2">
-          {ingredients.map((ing) => (
-            <div key={ing.key} className="flex items-center gap-2">
-              <IngredientAutocomplete
-                value={ing.name}
-                onChange={(v) => updateIngredient(ing.key, "name", v)}
-              />
-              <Input
-                value={ing.quantity}
-                onChange={(e) =>
-                  updateIngredient(ing.key, "quantity", e.target.value)
-                }
-                placeholder="Qty"
-                className="w-20"
-                disabled={ing.quantity === "q.b."}
-              />
-              <Input
-                value={ing.unit}
-                onChange={(e) =>
-                  updateIngredient(ing.key, "unit", e.target.value)
-                }
-                placeholder="Unit"
-                className="w-16"
-                disabled={ing.quantity === "q.b."}
-              />
-              <Button
-                type="button"
-                variant={ing.quantity === "q.b." ? "default" : "outline"}
-                size="sm"
-                className="shrink-0 text-xs px-2"
-                onClick={() => toggleQb(ing.key)}
-              >
-                q.b.
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="shrink-0 text-muted-foreground hover:text-destructive"
-                onClick={() => removeIngredient(ing.key)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+          {ingredients.map((ing, i) => {
+            const prevIng = ingredients[i - 1];
+            const isGrouped = !!ing.alternativeGroupId;
+            const isFirstInGroup =
+              isGrouped &&
+              (!prevIng || prevIng.alternativeGroupId !== ing.alternativeGroupId);
+            const isContinuation =
+              isGrouped && prevIng?.alternativeGroupId === ing.alternativeGroupId;
+
+            return (
+              <div key={ing.key}>
+                {isContinuation && (
+                  <div className="flex items-center pl-5 py-0.5">
+                    <span className="text-xs text-muted-foreground">or</span>
+                  </div>
+                )}
+                <div
+                  className={`flex items-center gap-2 ${
+                    isGrouped ? "pl-3 border-l-2 border-blue-400" : ""
+                  }`}
+                >
+                  <IngredientAutocomplete
+                    value={ing.name}
+                    onChange={(v) => updateIngredient(ing.key, "name", v)}
+                  />
+                  <Input
+                    value={ing.quantity}
+                    onChange={(e) =>
+                      updateIngredient(ing.key, "quantity", e.target.value)
+                    }
+                    placeholder="Qty"
+                    className="w-20"
+                    disabled={ing.quantity === "q.b."}
+                  />
+                  <Input
+                    value={ing.unit}
+                    onChange={(e) =>
+                      updateIngredient(ing.key, "unit", e.target.value)
+                    }
+                    placeholder="Unit"
+                    className="w-16"
+                    disabled={ing.quantity === "q.b."}
+                  />
+                  <Button
+                    type="button"
+                    variant={ing.quantity === "q.b." ? "default" : "outline"}
+                    size="sm"
+                    className="shrink-0 text-xs px-2"
+                    onClick={() => toggleQb(ing.key)}
+                  >
+                    q.b.
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={ing.optional ? "default" : "outline"}
+                    size="sm"
+                    className="shrink-0 text-xs px-2"
+                    onClick={() => toggleOptional(ing.key)}
+                  >
+                    Opt.
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0 text-muted-foreground"
+                    onClick={() => addAlternative(ing.key)}
+                    title="Add alternative"
+                  >
+                    <GitBranch className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                    onClick={() => handleRemoveIngredient(ing.key)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })}
 
           {/* Add ingredient row */}
           <div className="flex items-center gap-2 pt-3 border-t border-dashed">

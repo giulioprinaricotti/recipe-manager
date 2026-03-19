@@ -19,10 +19,12 @@ export function IngredientAutocomplete({
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [isFocused, setIsFocused] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
+    if (!isFocused) return;
     if (value.length < 3) {
       setSuggestions([]);
       setOpen(false);
@@ -38,7 +40,7 @@ export function IngredientAutocomplete({
     }, 300);
 
     return () => clearTimeout(debounceRef.current);
-  }, [value]);
+  }, [value, isFocused]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -77,16 +79,23 @@ export function IngredientAutocomplete({
   }
 
   return (
-    <div ref={wrapperRef} className="relative flex-1">
+    <div
+      ref={wrapperRef}
+      className="relative flex-1"
+      role="combobox"
+      aria-expanded={open}
+      aria-haspopup="listbox"
+    >
       <Input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onFocus={() => suggestions.length > 0 && setOpen(true)}
+        onFocus={() => {
+          setIsFocused(true);
+          if (suggestions.length > 0) setOpen(true);
+        }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder ?? "Ingredient name"}
         autoComplete="off"
-        role="combobox"
-        aria-expanded={open}
       />
       {open && suggestions.length > 0 && (
         <ul

@@ -1,9 +1,13 @@
+import { formatIngredientLines } from "./ingredient-utils";
+
 const BRING_DEEPLINK_API = "https://api.getbring.com/rest/bringrecipes/deeplink";
 
 interface BringIngredient {
   name: string;
   quantity?: string | null;
   unit?: string | null;
+  optional?: boolean;
+  alternativeGroupId?: string | null;
 }
 
 /**
@@ -31,12 +35,7 @@ export function getBringDeeplink(
 export function formatIngredientsForBring(
   ingredients: BringIngredient[]
 ): string {
-  return ingredients
-    .map((ing) => {
-      const parts = [ing.quantity, ing.unit, ing.name].filter(Boolean);
-      return parts.join(" ");
-    })
-    .join("\n");
+  return formatIngredientLines(ingredients).join("\n");
 }
 
 /**

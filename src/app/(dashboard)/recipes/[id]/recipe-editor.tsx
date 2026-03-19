@@ -17,6 +17,8 @@ interface Ingredient {
   name: string;
   quantity: string | null;
   unit: string | null;
+  optional: boolean;
+  alternativeGroupId: string | null;
 }
 
 interface Instruction {
@@ -48,6 +50,8 @@ export function RecipeEditor({
         name: ing.name,
         quantity: ing.quantity ?? "",
         unit: ing.unit ?? "",
+        optional: ing.optional,
+        alternativeGroupId: ing.alternativeGroupId,
       })
     );
 
@@ -97,16 +101,53 @@ export function RecipeEditor({
             )}
           </div>
           <ul className="space-y-1">
-            {ingredients.map((ing) => (
-              <li key={ing.id} className="flex gap-2 text-sm">
-                {(ing.quantity || ing.unit) && (
-                  <span className="text-muted-foreground w-20 shrink-0">
-                    {[ing.quantity, ing.unit].filter(Boolean).join(" ")}
-                  </span>
-                )}
-                <span>{ing.name}</span>
-              </li>
-            ))}
+            {(() => {
+              const items: React.ReactNode[] = [];
+              const seen = new Set<string>();
+              for (const ing of ingredients) {
+                if (ing.alternativeGroupId) {
+                  if (seen.has(ing.alternativeGroupId)) continue;
+                  seen.add(ing.alternativeGroupId);
+                  const alts = ingredients.filter(
+                    (i) => i.alternativeGroupId === ing.alternativeGroupId
+                  );
+                  const first = alts[0];
+                  const isOptional = alts.some((a) => a.optional);
+                  items.push(
+                    <li key={ing.id} className="flex gap-2 text-sm">
+                      {(first.quantity || first.unit) && (
+                        <span className="text-muted-foreground w-20 shrink-0">
+                          {[first.quantity, first.unit].filter(Boolean).join(" ")}
+                        </span>
+                      )}
+                      <span>
+                        {alts.map((a) => a.name).join(" or ")}
+                        {isOptional && (
+                          <span className="text-muted-foreground ml-1">(optional)</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                } else {
+                  items.push(
+                    <li key={ing.id} className="flex gap-2 text-sm">
+                      {(ing.quantity || ing.unit) && (
+                        <span className="text-muted-foreground w-20 shrink-0">
+                          {[ing.quantity, ing.unit].filter(Boolean).join(" ")}
+                        </span>
+                      )}
+                      <span>
+                        {ing.name}
+                        {ing.optional && (
+                          <span className="text-muted-foreground ml-1">(optional)</span>
+                        )}
+                      </span>
+                    </li>
+                  );
+                }
+              }
+              return items;
+            })()}
           </ul>
         </section>
       )}

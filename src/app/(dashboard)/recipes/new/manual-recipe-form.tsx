@@ -16,7 +16,7 @@ import type {
 } from "./types";
 
 const initialIngredients: EditableIngredient[] = [
-  { key: crypto.randomUUID(), name: "", quantity: "", unit: "" },
+  { key: crypto.randomUUID(), name: "", quantity: "", unit: "", optional: false, alternativeGroupId: null },
 ];
 
 const initialInstructions: EditableInstruction[] = [

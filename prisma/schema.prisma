@@ -45,13 +45,15 @@ model Recipe {
 }
 
 model Ingredient {
-  id       String  @id @default(cuid())
-  recipeId String
-  name     String
-  quantity String?
-  unit     String?
-  order    Int
-  recipe   Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  id                 String  @id @default(cuid())
+  recipeId           String
+  name               String
+  quantity           String?
+  unit               String?
+  order              Int
+  optional           Boolean @default(false)
+  alternativeGroupId String?
+  recipe             Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
 
   @@index([recipeId])
 }

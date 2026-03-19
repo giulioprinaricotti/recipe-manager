@@ -43,7 +43,7 @@ export async function saveScrapedRecipe(
       ingredients: {
         create: recipe.ingredients.map((raw, i) => {
           const { name, quantity, unit } = parseIngredient(raw);
-          return { name, quantity, unit, order: i };
+          return { name, quantity, unit, order: i, optional: false, alternativeGroupId: null };
         }),
       },
       instructions: {
@@ -108,6 +108,8 @@ export async function saveEditedRecipe(
           quantity: ing.quantity.trim() || null,
           unit: ing.unit.trim() || null,
           order: i,
+          optional: ing.optional,
+          alternativeGroupId: ing.alternativeGroupId,
         })),
       },
       instructions: {

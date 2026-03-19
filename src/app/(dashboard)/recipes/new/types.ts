@@ -3,6 +3,8 @@ export interface EditableIngredient {
   name: string;
   quantity: string;
   unit: string;
+  optional: boolean;
+  alternativeGroupId: string | null;
 }
 
 export interface EditableInstruction {
@@ -15,6 +17,8 @@ export interface RecipeContentData {
     name: string;
     quantity: string;
     unit: string;
+    optional: boolean;
+    alternativeGroupId: string | null;
   }[];
   instructions: {
     description: string;
@@ -34,6 +38,8 @@ export interface EditedRecipePayload {
     name: string;
     quantity: string;
     unit: string;
+    optional: boolean;
+    alternativeGroupId: string | null;
   }[];
   instructions: {
     description: string;
