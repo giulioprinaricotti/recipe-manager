@@ -122,6 +122,40 @@ export async function updateRecipeMetadata(
   return undefined;
 }
 
+export async function updateRecipeTitle(
+  recipeId: string,
+  title: string
+): Promise<{ error: string } | void> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
+  const trimmed = title.trim();
+  if (!trimmed) {
+    return { error: "Title cannot be empty" };
+  }
+
+  const recipe = await prisma.recipe.findUnique({
+    where: { id: recipeId, userId: session.user.id },
+    select: { id: true },
+  });
+
+  if (!recipe) {
+    return { error: "Recipe not found" };
+  }
+
+  await prisma.recipe.update({
+    where: { id: recipeId },
+    data: { title: trimmed },
+  });
+
+  revalidatePath(`/recipes/${recipeId}`);
+  revalidatePath("/recipes");
+
+  return undefined;
+}
+
 export async function updateRecipeCoverImage(
   recipeId: string,
   imageUrl: string | undefined,

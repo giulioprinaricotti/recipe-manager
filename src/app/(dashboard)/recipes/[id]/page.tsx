@@ -8,6 +8,7 @@ import { RecipeTagEditor } from "./recipe-tag-editor";
 import { RecipeEditor } from "./recipe-editor";
 import { RecipeMetadataEditor } from "./recipe-metadata-editor";
 import { RecipeCoverImage } from "./recipe-cover-image";
+import { RecipeTitleEditor } from "./recipe-title-editor";
 import { AddToNextWeekButton } from "./add-to-next-week-button";
 
 export default async function RecipePage({
@@ -65,7 +66,7 @@ export default async function RecipePage({
 
       <div className="flex items-start justify-between gap-4 mb-2">
         <div>
-          <h1 className="text-3xl font-semibold">{recipe.title}</h1>
+          <RecipeTitleEditor recipeId={recipe.id} title={recipe.title} isOwn={isOwn} />
           {!isOwn && (
             <p className="text-sm text-muted-foreground mt-1">
               Added by {recipe.user.name || recipe.user.email}
