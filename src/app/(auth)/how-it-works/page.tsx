@@ -11,19 +11,37 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const HOW_IT_WORKS_TITLE = "Come funziona — Recipe Manager";
 const HOW_IT_WORKS_DESCRIPTION =
   "Pianifica i pasti della settimana, salva le tue ricette e manda la lista della spesa su Bring! con un tap. Pensato dopo HelloFresh Italia.";
+
+// Next does NOT deep-merge openGraph / twitter from parent metadata, so we
+// repeat the full blocks here (otherwise og:image, og:url, og:locale, og:type
+// and twitter:card=summary_large_image would be lost on this route).
+const OG_IMAGE = {
+  url: "/og/default.jpg",
+  width: 1200,
+  height: 630,
+  alt: "Recipe Manager — pianifica i pasti della settimana",
+};
 
 export const metadata: Metadata = {
   title: "Come funziona",
   description: HOW_IT_WORKS_DESCRIPTION,
   openGraph: {
-    title: "Come funziona — Recipe Manager",
+    type: "website",
+    siteName: "Recipe Manager",
+    locale: "it_IT",
+    url: "/how-it-works",
+    title: HOW_IT_WORKS_TITLE,
     description: HOW_IT_WORKS_DESCRIPTION,
+    images: [OG_IMAGE],
   },
   twitter: {
-    title: "Come funziona — Recipe Manager",
+    card: "summary_large_image",
+    title: HOW_IT_WORKS_TITLE,
     description: HOW_IT_WORKS_DESCRIPTION,
+    images: [OG_IMAGE.url],
   },
 };
 
