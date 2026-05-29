@@ -13,9 +13,42 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+// OG image: Unsplash photo by Brooke Lark (photo-1473093295043-cdd812d0e601),
+// cropped to 1200x630. Unsplash License — free for commercial use, no
+// attribution required (but credit appreciated).
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://recipes.giulioprinaricotti.com";
+const OG_IMAGE = {
+  url: "/og/default.jpg",
+  width: 1200,
+  height: 630,
+  alt: "Recipe Manager — pianifica i pasti della settimana",
+};
+const DEFAULT_DESCRIPTION =
+  "Pianifica i pasti della settimana, salva le tue ricette e manda la lista della spesa su Bring!.";
+
 export const metadata: Metadata = {
-  title: "Recipe Manager",
-  description: "Family recipe collection and meal planning",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Recipe Manager",
+    template: "%s — Recipe Manager",
+  },
+  description: DEFAULT_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Recipe Manager",
+    locale: "it_IT",
+    url: SITE_URL,
+    title: "Recipe Manager",
+    description: DEFAULT_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Recipe Manager",
+    description: DEFAULT_DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
 };
 
 export default function RootLayout({

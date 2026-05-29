@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import {
   ChefHat,
@@ -9,6 +10,22 @@ import {
   Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+const HOW_IT_WORKS_DESCRIPTION =
+  "Pianifica i pasti della settimana, salva le tue ricette e manda la lista della spesa su Bring! con un tap. Pensato dopo HelloFresh Italia.";
+
+export const metadata: Metadata = {
+  title: "Come funziona",
+  description: HOW_IT_WORKS_DESCRIPTION,
+  openGraph: {
+    title: "Come funziona — Recipe Manager",
+    description: HOW_IT_WORKS_DESCRIPTION,
+  },
+  twitter: {
+    title: "Come funziona — Recipe Manager",
+    description: HOW_IT_WORKS_DESCRIPTION,
+  },
+};
 
 export default function HowItWorksPage() {
   return (
