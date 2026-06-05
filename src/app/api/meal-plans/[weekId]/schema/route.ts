@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { fromWeekId, formatWeekLabel } from "@/lib/weeks";
 import { formatIngredientLines } from "@/lib/ingredient-utils";
+import { aggregateIngredients } from "@/lib/ingredient-aggregator";
 
 export async function GET(
   req: NextRequest,
@@ -38,9 +39,13 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const allIngredients = mealPlan.items.flatMap((item) =>
-    formatIngredientLines(item.recipe.ingredients)
+  // Flatten ingredients across the week, aggregate duplicates (same name +
+  // unit) into a single line, then format for Bring! / clipboard.
+  const rawIngredients = mealPlan.items.flatMap(
+    (item) => item.recipe.ingredients
   );
+  const aggregated = aggregateIngredients(rawIngredients);
+  const allIngredients = formatIngredientLines(aggregated);
 
   const jsonLd = {
     "@context": "https://schema.org",
