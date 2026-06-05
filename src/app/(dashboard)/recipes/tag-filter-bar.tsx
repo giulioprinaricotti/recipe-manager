@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { RECIPE_TAGS } from "@/lib/tags";
+import { TAG_CATEGORIES, getTagsByCategory } from "@/lib/tags";
 import { cn } from "@/lib/utils";
 
 export function TagFilterBar() {
@@ -33,23 +33,36 @@ export function TagFilterBar() {
   }
 
   return (
-    <div className="flex flex-wrap gap-2 mb-4">
-      {RECIPE_TAGS.map((tag) => {
-        const active = activeTags.has(tag.slug);
+    <div className="space-y-3 mb-4">
+      {TAG_CATEGORIES.map((cat) => {
+        const tagsInCat = getTagsByCategory(cat.slug);
+        if (tagsInCat.length === 0) return null;
         return (
-          <button
-            key={tag.slug}
-            onClick={() => toggle(tag.slug)}
-            className={cn(
-              "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
-              "border cursor-pointer",
-              active
-                ? `${tag.colorClasses} border-transparent`
-                : "bg-background text-muted-foreground border-border hover:border-foreground"
-            )}
-          >
-            {tag.label}
-          </button>
+          <div key={cat.slug}>
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+              {cat.label}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tagsInCat.map((tag) => {
+                const active = activeTags.has(tag.slug);
+                return (
+                  <button
+                    key={tag.slug}
+                    onClick={() => toggle(tag.slug)}
+                    className={cn(
+                      "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
+                      "border cursor-pointer",
+                      active
+                        ? `${tag.colorClasses} border-transparent`
+                        : "bg-background text-muted-foreground border-border hover:border-foreground"
+                    )}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         );
       })}
     </div>
