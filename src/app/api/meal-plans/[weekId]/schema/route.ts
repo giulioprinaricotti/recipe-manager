@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { fromWeekId, formatWeekLabel } from "@/lib/weeks";
 import { formatIngredientLines } from "@/lib/ingredient-utils";
 import { aggregateIngredients } from "@/lib/ingredient-aggregator";
+import { translateIngredientName } from "@/lib/ingredient-translator";
 
 export async function GET(
   req: NextRequest,
@@ -39,12 +40,19 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  // Flatten ingredients across the week, aggregate duplicates (same name +
-  // unit) into a single line, then format for Bring! / clipboard.
+  // Flatten ingredients across the week, normalise EN -> IT names so
+  // Bring! can match icons in the user's locale, then aggregate duplicates
+  // (same name + unit) into a single line, then format for Bring! /
+  // clipboard. Translation runs before aggregation so a recipe with
+  // "tomato" and another with "pomodoro" collapse to one line.
   const rawIngredients = mealPlan.items.flatMap(
     (item) => item.recipe.ingredients
   );
-  const aggregated = aggregateIngredients(rawIngredients);
+  const translated = rawIngredients.map((it) => ({
+    ...it,
+    name: translateIngredientName(it.name),
+  }));
+  const aggregated = aggregateIngredients(translated);
   const allIngredients = formatIngredientLines(aggregated);
 
   const jsonLd = {
