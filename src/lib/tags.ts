@@ -24,6 +24,26 @@ export const RECIPE_TAGS = [
     label: "Spicy",
     colorClasses: "bg-red-100 text-red-800",
   },
+  {
+    slug: "spring",
+    label: "Spring",
+    colorClasses: "bg-lime-100 text-lime-800",
+  },
+  {
+    slug: "summer",
+    label: "Summer",
+    colorClasses: "bg-yellow-100 text-yellow-800",
+  },
+  {
+    slug: "autumn",
+    label: "Autumn",
+    colorClasses: "bg-orange-100 text-orange-800",
+  },
+  {
+    slug: "winter",
+    label: "Winter",
+    colorClasses: "bg-sky-100 text-sky-800",
+  },
 ] as const;
 
 export type TagSlug = (typeof RECIPE_TAGS)[number]["slug"];
