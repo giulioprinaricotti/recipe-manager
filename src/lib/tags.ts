@@ -22,20 +22,20 @@ export const RECIPE_TAGS = [
     colorClasses: "bg-emerald-100 text-emerald-800",
   },
   {
+    slug: "omega-3",
+    label: "Omega-3",
+    category: "dietary",
+    colorClasses: "bg-teal-100 text-teal-800",
+  },
+  {
     slug: "breakfast",
     label: "Breakfast",
     category: "meal-type",
     colorClasses: "bg-rose-100 text-rose-800",
   },
   {
-    slug: "lunch",
-    label: "Lunch",
-    category: "meal-type",
-    colorClasses: "bg-cyan-100 text-cyan-800",
-  },
-  {
-    slug: "dinner",
-    label: "Dinner",
+    slug: "main",
+    label: "Main course",
     category: "meal-type",
     colorClasses: "bg-indigo-100 text-indigo-800",
   },
