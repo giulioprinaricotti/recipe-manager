@@ -32,9 +32,12 @@ model Recipe {
   prepTime    Int?
   cookTime    Int?
   tags        String[]
+  clonedFromId String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clonedFrom    Recipe?       @relation("RecipeClones", fields: [clonedFromId], references: [id], onDelete: SetNull)
+  clones        Recipe[]      @relation("RecipeClones")
   ingredients   Ingredient[]
   instructions  Instruction[]
   mealPlanItems MealPlanItem[]
@@ -42,6 +45,7 @@ model Recipe {
   invitations   Invitation[]
 
   @@index([userId])
+  @@index([clonedFromId])
 }
 
 model Ingredient {

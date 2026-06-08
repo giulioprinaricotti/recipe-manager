@@ -12,21 +12,20 @@ import {
 } from "@/components/ui/card";
 import { TagBadge } from "@/components/tag-badge";
 import { TagFilterBar } from "./tag-filter-bar";
-import { RecipeViewToggle } from "./recipe-view-toggle";
 import { FavouriteButton } from "./favourite-button";
 
 export default async function RecipesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tags?: string; view?: string }>;
+  searchParams: Promise<{ tags?: string }>;
 }) {
   const session = await auth();
   const userId = session!.user.id;
-  const { tags: tagsParam, view } = await searchParams;
+  const { tags: tagsParam } = await searchParams;
   const activeTags = tagsParam?.split(",").filter(Boolean) ?? [];
-  const isMineView = view === "mine";
 
-  // Fetch favourite IDs for the current user
+  // Legacy favourites granted before recipes became private. Listed alongside
+  // own recipes; no new cross-user favourites can be created.
   const favourites = await prisma.favourite.findMany({
     where: { userId },
     select: { recipeId: true },
@@ -34,19 +33,12 @@ export default async function RecipesPage({
   const favouriteIds = new Set(favourites.map((f) => f.recipeId));
 
   const tagFilter = activeTags.length > 0 ? { tags: { hasSome: activeTags } } : {};
-
-  let whereClause: object;
-  if (isMineView) {
-    // Own recipes + explicitly favourited recipes
-    whereClause = {
-      OR: [
-        { userId, ...tagFilter },
-        { id: { in: Array.from(favouriteIds) }, ...tagFilter },
-      ],
-    };
-  } else {
-    whereClause = tagFilter;
-  }
+  const whereClause = {
+    OR: [
+      { userId, ...tagFilter },
+      { id: { in: Array.from(favouriteIds) }, ...tagFilter },
+    ],
+  };
 
   const recipes = await prisma.recipe.findMany({
     where: whereClause,
@@ -59,21 +51,16 @@ export default async function RecipesPage({
     },
   });
 
-  const pageTitle = isMineView ? "My Recipes" : "Recipes";
+  const pageTitle = "My Recipes";
 
   if (recipes.length === 0) {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold">{pageTitle}</h1>
-          <div className="flex items-center gap-3">
-            <Suspense fallback={null}>
-              <RecipeViewToggle />
-            </Suspense>
-            <Button asChild>
-              <Link href="/recipes/new">Add Recipe</Link>
-            </Button>
-          </div>
+          <Button asChild>
+            <Link href="/recipes/new">Add Recipe</Link>
+          </Button>
         </div>
         <Suspense fallback={null}>
           <TagFilterBar />
@@ -101,14 +88,9 @@ export default async function RecipesPage({
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-semibold">{pageTitle}</h1>
-        <div className="flex items-center gap-3">
-          <Suspense fallback={null}>
-            <RecipeViewToggle />
-          </Suspense>
-          <Button asChild>
-            <Link href="/recipes/new">Add Recipe</Link>
-          </Button>
-        </div>
+        <Button asChild>
+          <Link href="/recipes/new">Add Recipe</Link>
+        </Button>
       </div>
       <Suspense fallback={null}>
         <TagFilterBar />
@@ -116,7 +98,7 @@ export default async function RecipesPage({
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {recipes.map((recipe) => {
           const isOwn = recipe.userId === userId;
-          const isFavourited = isOwn || favouriteIds.has(recipe.id);
+          const isLegacyShared = !isOwn && favouriteIds.has(recipe.id);
           const authorName = recipe.user.name || recipe.user.email;
           return (
             <div key={recipe.id} className="relative">
@@ -132,7 +114,7 @@ export default async function RecipesPage({
                   <CardHeader>
                     <CardTitle>{recipe.title}</CardTitle>
                     {!isOwn && (
-                      <p className="text-xs text-muted-foreground">By {authorName}</p>
+                      <p className="text-xs text-muted-foreground">Shared by {authorName}</p>
                     )}
                     {recipe.description && (
                       <CardDescription className="line-clamp-2">
@@ -156,13 +138,11 @@ export default async function RecipesPage({
                   </CardContent>
                 </Card>
               </Link>
-              <div className="absolute top-2 right-2">
-                <FavouriteButton
-                  recipeId={recipe.id}
-                  isFavourited={isFavourited}
-                  isOwn={isOwn}
-                />
-              </div>
+              {isLegacyShared && (
+                <div className="absolute top-2 right-2">
+                  <FavouriteButton recipeId={recipe.id} />
+                </div>
+              )}
             </div>
           );
         })}

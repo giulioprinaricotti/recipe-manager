@@ -1,49 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { Heart } from "lucide-react";
+import { useState, useTransition } from "react";
+import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toggleFavourite } from "./[id]/favourite-actions";
+import { removeLegacyFavourite } from "./[id]/favourite-actions";
 
 interface FavouriteButtonProps {
   recipeId: string;
-  isFavourited: boolean;
-  isOwn: boolean;
 }
 
-export function FavouriteButton({
-  recipeId,
-  isFavourited,
-  isOwn,
-}: FavouriteButtonProps) {
-  const [optimistic, setOptimistic] = useState(isFavourited);
+/**
+ * Only rendered for legacy cross-user Favourites (granted before recipes
+ * became private). Lets the recipient remove the shared recipe from their
+ * list. No "add" path exists anymore — share via invite link clones instead.
+ */
+export function FavouriteButton({ recipeId }: FavouriteButtonProps) {
+  const [hidden, setHidden] = useState(false);
+  const [isPending, startTransition] = useTransition();
 
-  if (isOwn) {
-    return (
-      <span className="p-1.5 text-rose-500">
-        <Heart className="h-4 w-4 fill-current" />
-      </span>
-    );
-  }
+  if (hidden) return null;
 
-  async function handleClick(e: React.MouseEvent) {
+  function handleClick(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
-    const next = !optimistic;
-    setOptimistic(next);
-    await toggleFavourite(recipeId, optimistic);
+    if (!confirm("Remove this shared recipe from your list?")) return;
+    setHidden(true);
+    startTransition(async () => {
+      await removeLegacyFavourite(recipeId);
+    });
   }
 
   return (
     <button
       onClick={handleClick}
+      disabled={isPending}
       className={cn(
-        "p-1.5 rounded-full transition-colors hover:bg-background/80",
-        optimistic ? "text-rose-500" : "text-muted-foreground hover:text-rose-400"
+        "p-1.5 rounded-full bg-background/80 backdrop-blur transition-colors",
+        "text-muted-foreground hover:text-destructive hover:bg-background"
       )}
-      aria-label={optimistic ? "Remove from favourites" : "Add to favourites"}
+      aria-label="Remove from my list"
+      title="Remove from my list"
     >
-      <Heart className={cn("h-4 w-4", optimistic && "fill-current")} />
+      <X className="h-4 w-4" />
     </button>
   );
 }

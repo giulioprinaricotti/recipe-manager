@@ -1,12 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { cloneRecipeForUser } from "@/lib/recipe-clone";
+import { isPublicInviteToken } from "@/lib/public-invite";
 
 export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ token: string }> }
 ) {
   const { token } = await params;
+
+  // Reusable open-invite token: no DB row, always valid, no attached recipe.
+  if (isPublicInviteToken(token)) {
+    return NextResponse.json({
+      inviterName: "Recipe Manager",
+      recipe: null,
+    });
+  }
 
   const invitation = await prisma.invitation.findUnique({
     where: { token },
@@ -59,6 +69,20 @@ export async function POST(
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
+  const existingUser = await prisma.user.findUnique({ where: { email } });
+  if (existingUser) {
+    return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  // Open-invite path: env-configured token, no DB invitation to consume,
+  // no recipe to clone, no usedAt to mark.
+  if (isPublicInviteToken(token)) {
+    await prisma.user.create({ data: { name, email, passwordHash } });
+    return NextResponse.json({ success: true });
+  }
+
   const invitation = await prisma.invitation.findUnique({
     where: { token },
   });
@@ -75,13 +99,6 @@ export async function POST(
     return NextResponse.json({ error: "This invitation has expired" }, { status: 410 });
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
-  if (existingUser) {
-    return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
-  }
-
-  const passwordHash = await bcrypt.hash(password, 12);
-
   await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: { name, email, passwordHash },
@@ -93,9 +110,7 @@ export async function POST(
     });
 
     if (invitation.recipeId) {
-      await tx.favourite.create({
-        data: { userId: newUser.id, recipeId: invitation.recipeId },
-      });
+      await cloneRecipeForUser(tx, invitation.recipeId, newUser.id);
     }
   });
 

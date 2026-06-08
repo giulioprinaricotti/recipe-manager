@@ -4,32 +4,21 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function toggleFavourite(
-  recipeId: string,
-  currentlyFavourited: boolean
-) {
+/**
+ * Remove a legacy cross-user Favourite (grants pre-dating private recipes).
+ * No "add" action exists: new sharing goes through the invite/clone flow.
+ */
+export async function removeLegacyFavourite(recipeId: string) {
   const session = await auth();
   if (!session?.user) throw new Error("Not authenticated");
 
   const userId = session.user.id;
 
-  // Prevent favouriting own recipes
-  const recipe = await prisma.recipe.findUnique({
-    where: { id: recipeId },
-    select: { userId: true },
-  });
-  if (!recipe) throw new Error("Recipe not found");
-  if (recipe.userId === userId) return;
-
-  if (currentlyFavourited) {
-    await prisma.favourite.delete({
-      where: { userId_recipeId: { userId, recipeId } },
+  await prisma.favourite
+    .delete({ where: { userId_recipeId: { userId, recipeId } } })
+    .catch(() => {
+      /* already removed — no-op */
     });
-  } else {
-    await prisma.favourite.create({
-      data: { userId, recipeId },
-    });
-  }
 
   revalidatePath("/recipes");
 }

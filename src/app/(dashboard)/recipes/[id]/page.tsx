@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { canViewRecipe } from "@/lib/recipe-access";
 import { getWeekStart, toWeekId } from "@/lib/weeks";
 import { ShareTooBringButton } from "./share-to-bring-button";
 import { RecipeTagEditor } from "./recipe-tag-editor";
@@ -18,6 +19,10 @@ export default async function RecipePage({
 }) {
   const { id } = await params;
   const session = await auth();
+  const userId = session!.user.id;
+
+  const access = await canViewRecipe(id, userId);
+  if (!access.allowed) notFound();
 
   const recipe = await prisma.recipe.findUnique({
     where: { id },
@@ -30,7 +35,7 @@ export default async function RecipePage({
 
   if (!recipe) notFound();
 
-  const isOwn = recipe.userId === session!.user.id;
+  const isOwn = access.isOwn;
 
   const currentWeek = getWeekStart(new Date());
   const nextWeek = new Date(currentWeek);
@@ -39,7 +44,7 @@ export default async function RecipePage({
 
   const nextWeekPlan = await prisma.mealPlan.findUnique({
     where: {
-      userId_weekStart: { userId: session!.user.id, weekStart: nextWeek },
+      userId_weekStart: { userId, weekStart: nextWeek },
     },
     select: { items: { where: { recipeId: id }, select: { id: true } } },
   });
@@ -74,7 +79,11 @@ export default async function RecipePage({
           )}
         </div>
         <div className="flex gap-2 shrink-0">
-          <AddToNextWeekButton recipeId={recipe.id} nextWeekId={nextWeekId} alreadyPlanned={isPlannedNextWeek} />
+          {/* Meal plans can only contain own recipes (addRecipeToMealPlan
+              enforces owner check). Hide button for legacy-shared recipes. */}
+          {isOwn && (
+            <AddToNextWeekButton recipeId={recipe.id} nextWeekId={nextWeekId} alreadyPlanned={isPlannedNextWeek} />
+          )}
           {recipe.ingredients.length > 0 && (
             <ShareTooBringButton
               recipeId={recipe.id}
