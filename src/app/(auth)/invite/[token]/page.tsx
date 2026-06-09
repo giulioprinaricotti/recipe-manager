@@ -45,6 +45,10 @@ export default function InviteSignupPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAccepting, setIsAccepting] = useState(false);
   const [acceptError, setAcceptError] = useState<string | null>(null);
+  // Suppresses the post-signup flash: once we kick off the redirect, hide
+  // the page chrome (which would otherwise re-render in "logged-in" mode
+  // for a frame between session refresh and router.push).
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   useEffect(() => {
     fetch(`/api/invitations/${token}`)
@@ -76,6 +80,7 @@ export default function InviteSignupPage() {
     }
 
     const data = (await res.json()) as { recipeId: string | null };
+    setIsRedirecting(true);
     router.push(data.recipeId ? `/recipes/${data.recipeId}` : "/recipes");
     router.refresh();
   }
@@ -104,20 +109,24 @@ export default function InviteSignupPage() {
       redirect: false,
     });
 
-    setIsSubmitting(false);
-
     if (result?.error) {
+      setIsSubmitting(false);
       setSubmitError("Account created but sign-in failed. Please log in.");
     } else {
+      // Keep isSubmitting + isRedirecting true so the form/CTA never gets
+      // a chance to switch to the logged-in branch before navigation.
+      setIsRedirecting(true);
       router.push("/recipes");
       router.refresh();
     }
   }
 
-  if (isLoading || sessionStatus === "loading") {
+  if (isLoading || sessionStatus === "loading" || isRedirecting) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-muted-foreground">Loading invitation...</p>
+        <p className="text-sm text-muted-foreground">
+          {isRedirecting ? "Taking you in..." : "Loading invitation..."}
+        </p>
       </div>
     );
   }
