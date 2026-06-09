@@ -29,8 +29,127 @@ const UNIT_CANONICAL: Record<string, string> = {
   milliliters: "ml",
 };
 
-function normalizeName(s: string): string {
-  return s.toLowerCase().trim().replace(/\s+/g, " ");
+/**
+ * IT plural head-word -> singular. Explicit map only — no morphological
+ * rules — to avoid false merges ("cipolle rosse" vs "cipolla bianca" stay
+ * distinct because only the head-word is normalised, not the qualifier).
+ *
+ * Plural tantum (olive, piselli, fagioli, ceci, lenticchie, spinaci,
+ * broccoli, asparagi, pinoli, gamberi, pomodorini): NOT singularised —
+ * used as plural in shopping context.
+ */
+const IT_PLURAL_TO_SINGULAR: Record<string, string> = {
+  pomodori: "pomodoro",
+  cipolle: "cipolla",
+  carote: "carota",
+  patate: "patata",
+  zucchine: "zucchina",
+  melanzane: "melanzana",
+  peperoni: "peperone",
+  funghi: "fungo",
+  limoni: "limone",
+  arance: "arancia",
+  mele: "mela",
+  pere: "pera",
+  pesche: "pesca",
+  fragole: "fragola",
+  mirtilli: "mirtillo",
+  lamponi: "lampone",
+  banane: "banana",
+  spicchi: "spicchio",
+  porri: "porro",
+  carciofi: "carciofo",
+  cetrioli: "cetriolo",
+  ravanelli: "ravanello",
+  cipollotti: "cipollotto",
+  noci: "noce",
+  nocciole: "nocciola",
+  mandorle: "mandorla",
+  pistacchi: "pistacchio",
+  fichi: "fico",
+  sgombri: "sgombro",
+  cozze: "cozza",
+  vongole: "vongola",
+  calamari: "calamaro",
+  salsicce: "salsiccia",
+  cosce: "coscia",
+  uova: "uovo",
+  jalapeños: "jalapeño",
+  peperoncini: "peperoncino",
+};
+
+// Qualifiers that don't change the shopping item — stripped from the KEY
+// so "basilico fresco" merges with plain "basilico". They are NOT removed
+// from the displayed name (which comes from the first member of the group).
+const QUALIFIERS_TO_STRIP = new Set<string>([
+  // IT
+  "fresco", "fresca", "freschi", "fresche",
+  "secco", "secca", "secchi", "secche",
+  "essiccato", "essiccata", "essiccati", "essiccate",
+  "tritato", "tritata", "tritati", "tritate",
+  "grattugiato", "grattugiata", "grattugiati", "grattugiate",
+  "pelato", "pelata", "pelati", "pelate",
+  "sfilettato", "sfilettata", "sfilettati", "sfilettate",
+  "dissalato", "dissalata", "dissalati", "dissalate",
+  "snocciolato", "snocciolata", "snocciolati", "snocciolate",
+  "denocciolato", "denocciolata", "denocciolati", "denocciolate",
+  // EN
+  "fresh", "dried", "chopped", "sliced", "minced", "grated",
+  "crushed", "peeled", "halved", "ground", "frozen",
+  "raw", "cooked", "fried", "roasted", "toasted",
+  "fine", "finely", "roughly", "thinly", "thickly",
+]);
+
+function stripParentheticals(s: string): string {
+  return s.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function stripTrailingClauses(s: string): string {
+  // Drop everything after the first comma — recipe annotations
+  // ("onion, finely chopped", "lemon, zested") are noise for shopping.
+  const i = s.indexOf(",");
+  if (i === -1) return s;
+  return s.slice(0, i).trim();
+}
+
+function stripQualifiers(s: string): string {
+  return s
+    .split(" ")
+    .filter((tok) => tok && !QUALIFIERS_TO_STRIP.has(tok))
+    .join(" ");
+}
+
+function singularizeHead(s: string): string {
+  if (!s) return s;
+  const parts = s.split(" ");
+  const head = parts[0];
+  const sing = IT_PLURAL_TO_SINGULAR[head];
+  if (sing) parts[0] = sing;
+  return parts.join(" ");
+}
+
+/**
+ * Produce the aggregation KEY name from a raw ingredient name.
+ *
+ * Pipeline (each step is conservative — only collapses items the user
+ * would buy as one):
+ *   1. lowercase + whitespace fold;
+ *   2. drop parentheticals  "( ... )";
+ *   3. drop trailing clauses after first ",";
+ *   4. strip shopping-irrelevant qualifiers (fresco, fresh, tritato, ...);
+ *   5. singularize the HEAD-word only via explicit map (preserves
+ *      modifiers — "cipolle rosse" -> "cipolla rossa", but NOT merged
+ *      with "cipolla bianca").
+ *
+ * Exported for tests; not consumed elsewhere.
+ */
+export function normalizeName(s: string): string {
+  let out = s.toLowerCase().trim().replace(/\s+/g, " ");
+  out = stripParentheticals(out);
+  out = stripTrailingClauses(out);
+  out = stripQualifiers(out);
+  out = singularizeHead(out);
+  return out.trim();
 }
 
 function normalizeUnit(u: string | null | undefined): string {
