@@ -13,7 +13,7 @@ export async function GET(
   // Reusable open-invite token: no DB row, always valid, no attached recipe.
   if (isPublicInviteToken(token)) {
     return NextResponse.json({
-      inviterName: "Recipe Manager",
+      inviterName: "dueforchette",
       recipe: null,
     });
   }

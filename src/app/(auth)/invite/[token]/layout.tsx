@@ -5,14 +5,14 @@ import type { Metadata } from "next";
 // Next does NOT deep-merge openGraph / twitter from parent metadata, so we
 // repeat the full blocks here (otherwise og:image, og:locale, og:type and
 // twitter:card=summary_large_image would be lost on this route).
-const INVITE_TITLE = "Sei stato/a invitato/a — Recipe Manager";
+const INVITE_TITLE = "Sei stato/a invitato/a — dueforchette";
 const INVITE_DESCRIPTION =
-  "Un amico ti ha invitato a provare Recipe Manager: pianifica i pasti della settimana e manda la spesa su Bring!.";
+  "Un amico ti ha invitato a provare dueforchette: pianifica i pasti della settimana e manda la spesa su Bring!.";
 const OG_IMAGE = {
   url: "/og/default.jpg",
   width: 1200,
   height: 630,
-  alt: "Recipe Manager — pianifica i pasti della settimana",
+  alt: "dueforchette — pianifica i pasti della settimana",
 };
 
 export const metadata: Metadata = {
@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   description: INVITE_DESCRIPTION,
   openGraph: {
     type: "website",
-    siteName: "Recipe Manager",
+    siteName: "dueforchette",
     locale: "it_IT",
     title: INVITE_TITLE,
     description: INVITE_DESCRIPTION,

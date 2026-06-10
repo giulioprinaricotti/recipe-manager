@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-const HOW_IT_WORKS_TITLE = "Come funziona — Recipe Manager";
+const HOW_IT_WORKS_TITLE = "Come funziona — dueforchette";
 const HOW_IT_WORKS_DESCRIPTION =
   "Pianifica i pasti della settimana, salva le tue ricette e manda la lista della spesa su Bring! con un tap. Pensato dopo HelloFresh Italia.";
 
@@ -22,7 +22,7 @@ const OG_IMAGE = {
   url: "/og/default.jpg",
   width: 1200,
   height: 630,
-  alt: "Recipe Manager — pianifica i pasti della settimana",
+  alt: "dueforchette — pianifica i pasti della settimana",
 };
 
 export const metadata: Metadata = {
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   description: HOW_IT_WORKS_DESCRIPTION,
   openGraph: {
     type: "website",
-    siteName: "Recipe Manager",
+    siteName: "dueforchette",
     locale: "it_IT",
     url: "/how-it-works",
     title: HOW_IT_WORKS_TITLE,
@@ -62,7 +62,7 @@ export default function HowItWorksPage() {
       {/* Hero */}
       <section className="container mx-auto px-4 pt-8 pb-16 text-center">
         <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          How <span className="text-amber-600">Recipe Manager</span> works
+          How <span className="text-amber-600">dueforchette</span> works
         </h1>
         <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
           A quick walkthrough of what you can do once you&apos;re in.

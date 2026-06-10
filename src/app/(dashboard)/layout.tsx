@@ -22,7 +22,7 @@ export default async function DashboardLayout({
           <div className="flex items-center gap-2 md:gap-6">
             <MobileNav userName={session.user.name || session.user.email} isAdmin={session.user.isAdmin} />
             <Link href="/recipes" className="text-lg font-semibold">
-              Recipe Manager
+              dueforchette
             </Link>
             <Link
               href="/recipes"

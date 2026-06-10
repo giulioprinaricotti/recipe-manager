@@ -34,7 +34,7 @@ export function MobileNav({ userName, isAdmin }: { userName: string | null | und
       </Button>
       <SheetContent side="left" className="w-64">
         <SheetHeader>
-          <SheetTitle>Recipe Manager</SheetTitle>
+          <SheetTitle>dueforchette</SheetTitle>
         </SheetHeader>
         <nav className="flex flex-col gap-2 px-4">
           <Link
