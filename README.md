@@ -56,6 +56,28 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) and sign in.
 
+### Local QA state (one command)
+
+`scripts/qa-state.sh` brings a throwaway local environment to a known state, so a
+check starts from the terminal instead of clicking through the browser. It needs
+Docker running and never touches the database in `.env`: it starts its own Postgres
+(container `recipe-manager-qa-db`, port 54329) and a dev server on port 3100.
+
+```bash
+# DB + QA user + three recipes + this week's menu + dev server, then signs in,
+# checks the week page and prints the shopping list Bring! would import
+bash scripts/qa-state.sh
+
+# Stop after a step: db | user | menu | server | list
+bash scripts/qa-state.sh --to menu
+
+# Stop the dev server and remove the QA database
+bash scripts/qa-state.sh --stop
+```
+
+Sign in at [http://localhost:3100](http://localhost:3100) with `qa@dueforchette.test` /
+`qa-password-local`. Re-running resets the QA user; logs are in `.qa/`.
+
 ## Deploy to Vercel
 
 1. Click the **Deploy with Vercel** button above

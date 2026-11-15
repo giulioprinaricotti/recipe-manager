@@ -13,6 +13,7 @@ Prisma 7 on Supabase Postgres (`@prisma/adapter-pg`), next-auth credentials (JWT
 
 ## Commands
 - `npm run dev` · `npm run build` · `npm run lint` · `npx tsc --noEmit` · `npm test`
+- `bash scripts/qa-state.sh [--to db|user|menu|server|list] [--stop]` — local QA state (README)
 
 ## Database / Prisma
 - **Do NOT run `npx prisma migrate dev`**: The Supabase connection uses a pooler that causes migrations to hang indefinitely. Instead, generate the SQL (or write it manually) and run it directly on the Supabase SQL Editor. Then run `npx prisma generate` locally to update the client.
