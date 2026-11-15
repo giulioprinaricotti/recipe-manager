@@ -34,3 +34,20 @@ Prisma 7 on Supabase Postgres (`@prisma/adapter-pg`), next-auth credentials (JWT
 - Invites and signup: `src/lib/public-invite.ts`, `src/app/api/invitations/`, `src/app/(auth)/{invite,join,signup}/`
 - Recipe visibility: `src/lib/recipe-access.ts`, `src/lib/recipe-clone.ts`
 - Owner notes (outside the repo): `../.brain/recipe-manager/gotchas.md`, `decisions.md`
+
+## Working in sessions
+- **One chat per task.** The brief is the task as written at the start of the chat
+  (there is no Linear here). A new task means a new chat, not a longer one.
+- **Docs by index, then by part.** Read this file, then only the `docs/` part the task
+  touches. Never read a whole file above 200 lines: `grep -n`, then `sed -n` around the hit.
+- **One test run, filtered.** Run the tests once and filter the output with `grep`
+  (failures and the summary line). Do not run them again and again.
+- **QA by page text.** Reach the state with `bash scripts/qa-state.sh`, check pages by
+  reading their text; take a screenshot only for the final proof.
+- **Close with the commit.** The commit message is the handoff document: what changed,
+  why, how to verify it, which files. Then append one line to the parent folder's
+  `../.brain/episodic.jsonl` (argument `"life"`, schema in `../CLAUDE.md`).
+- **Model.** Sonnet for tasks already designed and checkable by tests. Opus when the task
+  needs judgment: text people will read, product decisions not yet written down, a bug
+  with several possible causes, code about security or ownership. In doubt, Sonnet; if it
+  goes in circles for 2-3 turns, reopen the task with Opus.
