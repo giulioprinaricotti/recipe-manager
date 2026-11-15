@@ -36,8 +36,13 @@ Prisma 7 on Supabase Postgres (`@prisma/adapter-pg`), next-auth credentials (JWT
 - Owner notes (outside the repo): `../.brain/recipe-manager/gotchas.md`, `decisions.md`
 
 ## Working in sessions
-- **One chat per task.** The brief is the task as written at the start of the chat
-  (there is no Linear here). A new task means a new chat, not a longer one.
+- **One chat per task.** The brief is the Linear issue (team Fenpack, initiative
+  `dueforchette`): read it first with the Linear connector, both the "Per Giulio" and
+  "Per l'agente" sections, and check its blockers are done. With no issue, the brief is
+  the task as written at the start of the chat. A new task means a new chat, not a longer one.
+- **Linear stays short.** When the task is done, set the issue to Done and leave one short
+  comment: what the person can now do, plus 2-4 technical decisions. Full sentences, no
+  file lists; the detail lives in the commit.
 - **Docs by index, then by part.** Read this file, then only the `docs/` part the task
   touches. Never read a whole file above 200 lines: `grep -n`, then `sed -n` around the hit.
 - **One test run, filtered.** Run the tests once and filter the output with `grep`
