@@ -1,4 +1,5 @@
 import * as cheerio from "cheerio";
+import { safeFetch } from "./safe-fetch";
 
 export interface ScrapedRecipe {
   title: string;
@@ -24,7 +25,7 @@ function parseDuration(duration: string | undefined): number | undefined {
 export async function scrapeRecipe(
   url: string
 ): Promise<ScrapedRecipe | null> {
-  const response = await fetch(url, {
+  const response = await safeFetch(url, {
     headers: {
       "User-Agent":
         "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",

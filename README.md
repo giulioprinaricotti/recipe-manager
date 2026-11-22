@@ -34,6 +34,11 @@ Append `?pgbouncer=true` to the `DATABASE_URL` (port 6543) only.
 | `NEXTAUTH_SECRET` | Random secret — generate with `openssl rand -base64 32` |
 | `NEXTAUTH_URL` | Your app URL (`http://localhost:3000` for local dev) |
 | `UNSPLASH_ACCESS_KEY` | Unsplash API access key (optional) |
+| `ANTHROPIC_API_KEY` | Anthropic API key (optional). Enables the "From text" import; the tab is hidden without it |
+
+### Import from text
+
+On the Add Recipe page, "From text" turns pasted free text (an Instagram caption, a message, a note) into a recipe draft that opens in the same review form as "From URL". It needs `ANTHROPIC_API_KEY` and uses Claude Haiku, at a fraction of a cent per recipe. Limits: 8000 characters per text and 20 imports per user per day. Usage is counted in the `ImportUsage` table (a new model in `prisma/schema.prisma`), so create that table before setting the key (`npx prisma db push` on a fresh database; on Supabase behind the pooler, run the `CREATE TABLE` in the SQL Editor, see `AGENTS.md`). Until the table exists the import answers "not available" instead of calling the model.
 
 ## Local development
 

@@ -4,11 +4,26 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { parseIngredient } from "@/lib/ingredient-parser";
 import { scrapeRecipe, type ScrapedRecipe } from "@/lib/recipe-scraper";
+import { UnsafeUrlError } from "@/lib/safe-fetch";
+import { consumeTextImportQuota } from "@/lib/import-usage";
+import {
+  extractRecipeFromText,
+  isTextImportEnabled,
+  MAX_RECIPE_TEXT_LENGTH,
+  type ExtractedRecipe,
+  type ExtractionFailure,
+} from "@/lib/recipe-text-extractor";
+import { getTag } from "@/lib/tags";
 import type { EditedRecipePayload } from "./types";
 
 export async function scrapeRecipeAction(
   url: string
 ): Promise<{ data: ScrapedRecipe } | { error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+
   try {
     const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
     const data = await scrapeRecipe(normalizedUrl);
@@ -17,9 +32,57 @@ export async function scrapeRecipeAction(
     }
     return { data };
   } catch (err) {
+    if (err instanceof UnsafeUrlError) return { error: err.message };
+    if (err instanceof Error && err.name === "TimeoutError") {
+      return { error: "The site took too long to respond." };
+    }
     const message = err instanceof Error ? err.message : "Failed to fetch URL";
     return { error: message };
   }
+}
+
+const TEXT_IMPORT_ERRORS: Record<ExtractionFailure, string> = {
+  empty: "Paste some text first.",
+  too_long: `That text is too long. The limit is ${MAX_RECIPE_TEXT_LENGTH} characters.`,
+  no_recipe:
+    "No recipe found in this text. It needs at least some ingredients or steps.",
+  invalid_response: "Could not read a recipe from this text. Try again.",
+  unavailable: "Text import is not available right now. Try again later.",
+};
+
+export async function extractRecipeFromTextAction(
+  text: string
+): Promise<{ data: ExtractedRecipe } | { error: string }> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { error: "Not authenticated" };
+  }
+  if (!isTextImportEnabled()) {
+    return { error: TEXT_IMPORT_ERRORS.unavailable };
+  }
+
+  // Checked here as well so an empty or oversized text never spends quota.
+  const trimmed = typeof text === "string" ? text.trim() : "";
+  if (!trimmed) return { error: TEXT_IMPORT_ERRORS.empty };
+  if (trimmed.length > MAX_RECIPE_TEXT_LENGTH) {
+    return { error: TEXT_IMPORT_ERRORS.too_long };
+  }
+
+  let allowed: boolean;
+  try {
+    allowed = await consumeTextImportQuota(session.user.id);
+  } catch (err) {
+    // Without a working counter the paid call stays closed.
+    console.error("Text import quota check failed", err);
+    return { error: TEXT_IMPORT_ERRORS.unavailable };
+  }
+  if (!allowed) {
+    return { error: "Daily limit for text imports reached. Try again tomorrow." };
+  }
+
+  const result = await extractRecipeFromText(trimmed);
+  if (!result.ok) return { error: TEXT_IMPORT_ERRORS[result.reason] };
+  return { data: result.recipe };
 }
 
 export async function saveScrapedRecipe(
@@ -102,6 +165,7 @@ export async function saveEditedRecipe(
       servings: recipe.servings,
       prepTime: recipe.prepTime,
       cookTime: recipe.cookTime,
+      tags: (recipe.tags ?? []).filter((slug) => getTag(slug)),
       ingredients: {
         create: recipe.ingredients.map((ing, i) => ({
           name: ing.name.trim(),

@@ -18,6 +18,7 @@ model User {
   mealPlans    MealPlan[]
   favourites   Favourite[]
   invitations  Invitation[] @relation("InvitationsSent")
+  importUsage  ImportUsage[]
 }
 
 model Recipe {
@@ -123,4 +124,14 @@ model Invitation {
 
   @@index([token])
   @@index([inviterId])
+}
+
+// One row per user per UTC day: how many paid text imports they started.
+model ImportUsage {
+  userId String
+  day    DateTime @db.Date
+  count  Int      @default(0)
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, day])
 }

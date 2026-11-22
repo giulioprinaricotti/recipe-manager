@@ -34,6 +34,7 @@ export interface EditedRecipePayload {
   servings?: number;
   prepTime?: number;
   cookTime?: number;
+  tags?: string[];
   ingredients: {
     name: string;
     quantity: string;
