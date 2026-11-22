@@ -40,6 +40,16 @@ Append `?pgbouncer=true` to the `DATABASE_URL` (port 6543) only.
 
 On the Add Recipe page, "From text" turns pasted free text (an Instagram caption, a message, a note) into a recipe draft that opens in the same review form as "From URL". It needs `ANTHROPIC_API_KEY` and uses Claude Haiku, at a fraction of a cent per recipe. Limits: 8000 characters per text and 20 imports per user per day. Usage is counted in the `ImportUsage` table (a new model in `prisma/schema.prisma`), so create that table before setting the key (`npx prisma db push` on a fresh database; on Supabase behind the pooler, run the `CREATE TABLE` in the SQL Editor, see `AGENTS.md`). Until the table exists the import answers "not available" instead of calling the model.
 
+### Share from the phone and Instagram links
+
+The site is an installable web app (`/manifest.webmanifest`). On Android, open it in Chrome and choose "Install app": after that "dueforchette" appears in the share menu of other apps. Sharing a link or a text opens Add Recipe with the import already running and the draft ready to review; nothing is saved until you press Save.
+
+- A link to a recipe site goes through the "From URL" import.
+- A link to an Instagram post or reel: the server reads the public caption from Instagram's embed page (no login, the request names this app) and runs it through the text import, so it needs `ANTHROPIC_API_KEY` and counts toward the daily limit. The recipe must be written in the caption. If Instagram does not serve the page, the app says so: copy the caption and share the text instead.
+- A text (a copied caption, a chat message) goes through the text import.
+
+Pasting an Instagram link in the "From URL" field works the same way. The share menu needs you to be signed in already; after a sign-in the shared content is not kept.
+
 ## Local development
 
 ```bash

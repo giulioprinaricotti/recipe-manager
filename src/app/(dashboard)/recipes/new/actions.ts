@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { parseIngredient } from "@/lib/ingredient-parser";
 import { scrapeRecipe, type ScrapedRecipe } from "@/lib/recipe-scraper";
 import { UnsafeUrlError } from "@/lib/safe-fetch";
+import { fetchInstagramCaption, isInstagramPostUrl } from "@/lib/instagram-caption";
 import { consumeTextImportQuota } from "@/lib/import-usage";
 import {
   extractRecipeFromText,
@@ -13,12 +14,20 @@ import {
   type ExtractedRecipe,
   type ExtractionFailure,
 } from "@/lib/recipe-text-extractor";
-import { getTag } from "@/lib/tags";
+import { getTag, type TagSlug } from "@/lib/tags";
 import type { EditedRecipePayload } from "./types";
+
+/** A draft from a link: recipe sites give no tags, Instagram captions may. */
+export type ImportedRecipe = ScrapedRecipe & { tags?: TagSlug[] };
+
+const INSTAGRAM_NO_RECIPE =
+  "The caption of this post has no recipe. It may be in the images or only spoken in the video.";
+const INSTAGRAM_UNREADABLE =
+  "Could not read this Instagram post. Open it in Instagram, copy the caption and share or paste the text instead.";
 
 export async function scrapeRecipeAction(
   url: string
-): Promise<{ data: ScrapedRecipe } | { error: string }> {
+): Promise<{ data: ImportedRecipe } | { error: string }> {
   const session = await auth();
   if (!session?.user?.id) {
     return { error: "Not authenticated" };
@@ -26,6 +35,9 @@ export async function scrapeRecipeAction(
 
   try {
     const normalizedUrl = /^https?:\/\//i.test(url) ? url : `https://${url}`;
+    if (isInstagramPostUrl(normalizedUrl)) {
+      return await importInstagramPost(session.user.id, normalizedUrl);
+    }
     const data = await scrapeRecipe(normalizedUrl);
     if (!data) {
       return { error: "No recipe data found at this URL. The site may not use structured recipe markup." };
@@ -50,6 +62,29 @@ const TEXT_IMPORT_ERRORS: Record<ExtractionFailure, string> = {
   unavailable: "Text import is not available right now. Try again later.",
 };
 
+/**
+ * An Instagram post has no recipe markup: its caption goes through the same
+ * paid extraction, and the same daily allowance, as pasted text. The caption
+ * is fetched first so a post we cannot read costs nothing.
+ */
+async function importInstagramPost(
+  userId: string,
+  url: string
+): Promise<{ data: ImportedRecipe } | { error: string }> {
+  if (!isTextImportEnabled()) return { error: INSTAGRAM_UNREADABLE };
+
+  const fetched = await fetchInstagramCaption(url);
+  if (!fetched.ok) return { error: INSTAGRAM_UNREADABLE };
+
+  const result = await extractWithQuota(userId, fetched.caption);
+  if ("error" in result) {
+    return result.error === TEXT_IMPORT_ERRORS.no_recipe
+      ? { error: INSTAGRAM_NO_RECIPE }
+      : result;
+  }
+  return { data: { ...result.data, sourceUrl: fetched.postUrl } };
+}
+
 export async function extractRecipeFromTextAction(
   text: string
 ): Promise<{ data: ExtractedRecipe } | { error: string }> {
@@ -57,6 +92,13 @@ export async function extractRecipeFromTextAction(
   if (!session?.user?.id) {
     return { error: "Not authenticated" };
   }
+  return extractWithQuota(session.user.id, text);
+}
+
+async function extractWithQuota(
+  userId: string,
+  text: string
+): Promise<{ data: ExtractedRecipe } | { error: string }> {
   if (!isTextImportEnabled()) {
     return { error: TEXT_IMPORT_ERRORS.unavailable };
   }
@@ -70,7 +112,7 @@ export async function extractRecipeFromTextAction(
 
   let allowed: boolean;
   try {
-    allowed = await consumeTextImportQuota(session.user.id);
+    allowed = await consumeTextImportQuota(userId);
   } catch (err) {
     // Without a working counter the paid call stays closed.
     console.error("Text import quota check failed", err);
