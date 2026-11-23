@@ -12,7 +12,7 @@ const INSTAGRAM_HOSTS = new Set(["instagram.com", "www.instagram.com", "m.instag
 // /p/<code>/, /reel/<code>/, /reels/<code>/, /tv/<code>/, optionally prefixed by /<username>/.
 const POST_PATH = /^\/(?:[A-Za-z0-9._]+\/)?(?:p|reel|reels|tv)\/([A-Za-z0-9_-]{5,40})(?:\/|$)/;
 
-const USER_AGENT = "dueforchette/1.0 (+https://recipes.giulioprinaricotti.com)";
+const USER_AGENT = "dueforchette/1.0 (+https://www.dueforchette.it)";
 
 export type InstagramCaptionFailure = "blocked" | "no_caption";
 

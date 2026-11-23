@@ -194,7 +194,7 @@ export function EditRecipeForm({
       {/* Ingredients */}
       <section>
         <h3 className="text-sm font-medium mb-2">Ingredients</h3>
-        <div className="space-y-2">
+        <div className="space-y-3 sm:space-y-2">
           {ingredients.map((ing, i) => {
             const prevIng = ingredients[i - 1];
             const isGrouped = !!ing.alternativeGroupId;
@@ -212,7 +212,7 @@ export function EditRecipeForm({
                   </div>
                 )}
                 <div
-                  className={`flex items-center gap-2 ${
+                  className={`flex flex-wrap items-center gap-x-2 gap-y-1.5 sm:flex-nowrap [&>:first-child]:basis-[calc(100%-2.75rem)] sm:[&>:first-child]:basis-0 [&>:last-child]:order-1 sm:[&>:last-child]:order-none [&>:not(:first-child):not(:last-child)]:order-2 sm:[&>:not(:first-child):not(:last-child)]:order-none ${
                     isGrouped ? "pl-3 border-l-2 border-blue-400" : ""
                   }`}
                 >
@@ -226,7 +226,7 @@ export function EditRecipeForm({
                       updateIngredient(ing.key, "quantity", e.target.value)
                     }
                     placeholder="Qty"
-                    className="w-20"
+                    className="w-14 sm:w-20"
                     disabled={ing.quantity === "q.b."}
                   />
                   <Input
@@ -235,7 +235,7 @@ export function EditRecipeForm({
                       updateIngredient(ing.key, "unit", e.target.value)
                     }
                     placeholder="Unit"
-                    className="w-16"
+                    className="w-14 sm:w-16"
                     disabled={ing.quantity === "q.b."}
                   />
                   <Button
@@ -281,7 +281,7 @@ export function EditRecipeForm({
           })}
 
           {/* Add ingredient row */}
-          <div className="flex items-center gap-2 pt-3 border-t border-dashed">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 pt-3 border-t border-dashed sm:flex-nowrap [&>:first-child]:basis-full sm:[&>:first-child]:basis-0">
             <IngredientAutocomplete
               value={addRow.name}
               onChange={(v) => setAddRow({ ...addRow, name: v })}
@@ -293,7 +293,7 @@ export function EditRecipeForm({
                 setAddRow({ ...addRow, quantity: e.target.value })
               }
               placeholder="Qty"
-              className="w-20"
+              className="w-14 sm:w-20"
               disabled={addRow.quantity === "q.b."}
             />
             <Input
@@ -302,7 +302,7 @@ export function EditRecipeForm({
                 setAddRow({ ...addRow, unit: e.target.value })
               }
               placeholder="Unit"
-              className="w-16"
+              className="w-14 sm:w-16"
               disabled={addRow.quantity === "q.b."}
             />
             <Button

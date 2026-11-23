@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 // cropped to 1200x630. Unsplash License — free for commercial use, no
 // attribution required (but credit appreciated).
 const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://recipes.giulioprinaricotti.com";
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.dueforchette.it";
 const OG_IMAGE = {
   url: "/og/default.jpg",
   width: 1200,
